@@ -1,5 +1,6 @@
 #pragma once
 struct Stage {
+	int stageNum;
 	char stageName[25];
 	int maxActionCount;
 	int cost;
@@ -11,11 +12,11 @@ struct Stage {
 int stageWidth = 30,stageHeight = 20;
 int stageLength = 5;
 Stage stageInfo[5] = {
-	{ "튜토리얼", 10, 13, 6,11},
-	{"레벨 1 : 낯선 천장",10, 10, 16,1},
-	{"레벨 2 : 점프",10, 10, 16,1},
-	{"레벨 3 : 로켓 런처",10, 10, 16,1},
-	{"레벨 4 : 배터리",10, 10, 16,1}
+	{ 0, "튜토리얼", 10, 13, 6,11},
+	{1, "레벨 1 : 낯선 천장",10, 10, 16,1},
+	{2, "레벨 2 : 점프",10, 10, 16,1},
+	{3, "레벨 3 : 로켓 런처",10, 10, 16,1},
+	{4, "레벨 4 : 배터리",10, 10, 16,1}
 };
 
 

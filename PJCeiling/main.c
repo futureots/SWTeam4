@@ -5,8 +5,29 @@
 #include "stageNumerInfo.h"
 #include "stage_tutorial.h"
 #include "numberTexture.h";
+#include "prepareScene.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 
+
+
+/*
+/////////////////////////////////////추가 내용/////////////////////////////////////////
+
+textInput(int n, char*text) 텍스트 입력 함수
+텍스트 출력할 줄 n
+입력할 텍스트 text
+
+turnCountInput(int n, int p) 턴 카운트 입력 함수
+십의 자리 수 n
+일의 자리 수 p
+
+turnCountDown() 턴 카운트 감소 함수
+
+deckOut() 카드 내용 인게임 화면에 보여주는 함수
+
+deckCountDown() 카드 사용시 카운트 감소해주는 함수 (미구현)
+*/
 
 void drawMap(int startX, int startY, HANDLE curBuf);
 void drawBox(int startX, int startY, int height, int width);
@@ -22,7 +43,7 @@ int curX, curY;
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 27
 void setCursorPosition(int x, int y) {
-	COORD pos = { x*2,y };
+	COORD pos = { x * 2,y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 /*커서 숨김 함수
@@ -40,10 +61,10 @@ void eraseCursor() {
 // 화면 테두리 그리는 함수 (양쪽에서 중앙으로 이동하며 그리기)
 void drawBorder() {
 	int fullWidth = SCREEN_WIDTH;
-	int halfWidth = SCREEN_WIDTH/2;
+	int halfWidth = SCREEN_WIDTH / 2;
 
 	// 윗 가로선 양쪽에서 중앙으로 그리기
-	for (int i = halfWidth-1; i >=0; i--) {
+	for (int i = halfWidth - 1; i >= 0; i--) {
 		setCursorPosition(i, 0);
 		if (i == 0) printf("┌─");
 		else	printf("──");
@@ -86,16 +107,16 @@ void displayMainMenu() {
 	drawBorder();
 	// "낯선 천장" 텍스트를 특수문자로 표현 (폰트 크기 문제)
 
-	setCursorPosition(16 , 10);
+	setCursorPosition(16, 10);
 	printf(" └── ├   ／＼┤   -┻-    ㅡㅡ ");
-	setCursorPosition(16 , 11);
+	setCursorPosition(16, 11);
 	printf("  ─┼─            /＼┤    /＼├");
-	setCursorPosition(16 , 12);
+	setCursorPosition(16, 12);
 	printf("  /＼     └--     └--      ○");
 
 	int showText = 1;
 	while (!_kbhit()) {
-		setCursorPosition(17 , 15);
+		setCursorPosition(17, 15);
 
 		if (showText) {
 			printf("<<아무 버튼이나 누르세요>>\n");
@@ -195,11 +216,67 @@ int keyInput(int key) {
 }
 
 #pragma endregion
+//씬3 관련 함수
+#pragma region LevelSelectScreenFunction
+
+//마우스 좌표를 저장할 구조체
+typedef struct {
+	int X;
+	int Y;
+} MousePosition;
+
+//더블클릭했을 때 마우스 좌표를 반환하는 함수.
+//도움말 기능 포함.
+MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
+	INPUT_RECORD inputRecord;
+	DWORD events;
+	MousePosition mousePos = { -1, -1 };
+
+	// 콘솔 입력 모드에서 마우스 입력을 활성화.
+	SetConsoleMode(hConsoleInput, ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
+
+	while (1) {
+		ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
+
+		if (inputRecord.EventType == MOUSE_EVENT) {
+			MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
+			if (mouseEvent.dwEventFlags == MOUSE_MOVED) {
+				mousePos.X = mouseEvent.dwMousePosition.X;
+				mousePos.Y = mouseEvent.dwMousePosition.Y;
+				drawTooltip(mousePos.X, mousePos.Y);
+			}
+			if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
+				mousePos.X = mouseEvent.dwMousePosition.X;
+				mousePos.Y = mouseEvent.dwMousePosition.Y;
+				return mousePos;
+			}
+		}
+	}
+}
+
+void enableKeyboardInput(HANDLE hConsoleInput) {
+	// 콘솔 입력 모드를 키보드 입력으로.
+	SetConsoleMode(hConsoleInput, ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT);
+}
+
+void setPrepareOrigininfo() {
+	costInfo = stageInfo[currentLevel].cost;
+	for (int i = 0; i < 8; i++) {
+		//카드 인포는 아직 정해지지 않았으므로 일단 2로 초기화함.
+		cardInfo[i] = 2;
+		deckInfo[i] = 0;
+	}
+}
+
+#pragma endregion
 //씬4 관련 함수
 #pragma region InGameScene
 
 char str_text[8][35] = { 0 }; // 텍스트 박스 출력 텍스트
 int tens, ones; // 턴 박스 출력 텍스쳐 번호 // 십의자리, 일의자리
+int inGameCardInfo[8]; // 인게임에서 사용 되는 카드 정보
+int deckCount; // 카드 종류의 개수
+void deckOut();
 
 void levelBoxOut() {
 	COORD pos = { 62, 2 };
@@ -223,9 +300,18 @@ void drawInGame(HANDLE curBuf) {
 	//텍스트 박스 창
 	drawBox(30, 17, 10, 20);
 	// i 값이 카드 수
-	for (int i = 0; i < 5; i++) {
-		drawBox(i * 4, 21, 5, 4);
-	}
+
+	deckOut();
+}
+
+//텍스트 삽입 함수
+void textInput(int n, char* text) {
+	strcpy_s(str_text[n], 35, text);
+}
+//턴카운트 삽입 함수
+void trunCountInut(int n, int p) {
+	tens = n;
+	ones = p;
 }
 //텍스트 출력 함수
 void textBoxOut(char text[][35]) {
@@ -239,6 +325,17 @@ void textBoxOut(char text[][35]) {
 		pos.Y = startY + i;
 
 		Printscreen(pos.X, pos.Y, text[i], gScreen[gIndex]);
+	}
+}
+
+//턴 카운트 감소 함수
+void turnCountDown() {
+	if (ones == 0 && tens > 0) {
+		tens--;
+		ones = 9;
+	}
+	else {
+		ones--;
 	}
 }
 
@@ -277,6 +374,59 @@ void turnBoxOut(int num1, int num2) {
 		}
 	}
 }
+void deckOut() {
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	int startX = 60;
+	int startY = 0;
+	COORD pos = { 0,0 };
+	int deckCount = 0;
+	int p = 0, idx = 0;
+
+	for (int i = 0; i < 8; i++) {
+		if (deckInfo[i] != 0) {
+			printf("%d\n", p);
+			deckCount++;
+			char cardStr[10];
+			sprintf(cardStr, "%d 개", deckInfo[i]);  // 정수를 문자열로 변환
+
+			if (i == 0) {
+				Printscreen(p * 8 + 1, 22, " 밀기", gScreen[gIndex]);
+				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
+				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
+				inGameCardInfo[idx++] = i;
+			}
+			else if (i == 1) {
+				Printscreen(p * 8 + 1, 22, " 점프", gScreen[gIndex]);
+				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
+				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
+				inGameCardInfo[idx++] = i;
+			}
+			else if (i == 2) {
+				Printscreen(p * 8 + 1, 22, " 로켓", gScreen[gIndex]);
+				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
+				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
+				inGameCardInfo[idx++] = i;
+			}
+			p++;
+		}
+	}
+	for (int i = 0; i < deckCount; i++) {
+		drawBox(i * 4, 21, 5, 4);
+	}
+}
+
+/*
+void deckCountDown(int x, int y) {
+
+	for (int i = 0; i < deckCount; i++) {
+		if (y >= 21 && y < 26) {
+			if (x >= i * 8 && x < i * 8 + 4) {
+				inGameCardInfo[i]--;
+			}
+		}
+	}
+}
+*/
 //더블 버퍼를 이용해서 인게임 화면 그려주는 함수
 void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int numLevelBoxOut) {
 	screenClear();
@@ -309,7 +459,9 @@ int main() {
 	curCursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 
-	
+	MousePosition mousePos;
+
+
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
 	displayMainMenu(); // 메인화면 표시
@@ -349,29 +501,65 @@ int main() {
 
 		}
 
+		//씬 3
+		system("cls");
+		setPrepareOrigininfo();
+		drawPrepareBox();
+		drawMap(20, 1, hConsoleOut);
+		while (1) {
+			drawPrepareInfo();
+			// 더블클릭 위치 가져오기
+			mousePos = getMouseClickPosition(hConsoleInput);
+			if (mousePos.X != -1 && mousePos.Y != -1) {
+				detectPrepareFunc(mousePos.X, mousePos.Y);
+			}
+			if (mousePos.Y >= confirmCoord[1] && mousePos.Y <= confirmCoord[1] + 5 && mousePos.X >= confirmCoord[0] && mousePos.X <= confirmCoord[0] + 8) {
+				break;
+			}
+		}
+		//다시 키보드 입력으로 바꾸기
+		enableKeyboardInput(hConsoleInput);
+
+
 		//씬 4
 		screenInit();
 		screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
 		Sleep(1000);
-		strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
-		strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
-		strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
 
-		tens = 4, ones = 8; // 턴 상태창 숫자 설정
+		textInput(0, "눈을 뜨니 낯선천장이 보입니다.");
+		textInput(1, "일단 여기서 나가야할 것 같습니다.");
+		textInput(2, "'★'이 있는 곳까지 이동해봅시다.");
+
+		trunCountInut(2, 0);
 		screenRender(1, 1, 1, 1);
 		Sleep(1000);
-
+		
+		
+		for (int i = 0; i < 20; i++) {
+			turnCountDown();
+			screenRender(1, 1, 1, 1);
+			Sleep(1000);
+		}
+		
+		/*
+		// 활성화된 버퍼에서 마우스 좌표 받기
+		mousePos = getMouseClickPosition(gScreen[!gIndex]);
+		if (mousePos.X != -1 && mousePos.Y != -1) {
+			deckCountDown(mousePos.X, mousePos.Y);
+			screenRender(1, 1, 1, 1);
+		}
+		enableKeyboardInput(gScreen[!gIndex]);
+		*/
 		_getch();
 
 		screenRelease();
-		
+
 		//save(load()+1); //다음 레벨 열기
 	}
 	system("cls");
 
 	return 0;
 }
-
 #pragma region CMFunction
 
 void drawMap(int startX, int startY, HANDLE curBuf) {
@@ -420,7 +608,7 @@ void save(int k) {
 	return;
 }
 int load() {
-	int data=0;
+	int data = 0;
 	FILE* fp;
 	fp = fopen("data.bin", "rb");
 	if (fp == NULL) {
@@ -432,6 +620,7 @@ int load() {
 	return data;
 }
 #pragma endregion
+
 
 #pragma region InGameFunction
 
