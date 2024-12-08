@@ -119,7 +119,7 @@ void drawPrepareBox() {
 				printf("弛");
 			}
 			if (prepareMap[i][j] == 3) {
-				printf("忙");
+				printf("忙式");
 			}
 			if (prepareMap[i][j] == 4) {
 				printf("忖");
@@ -128,13 +128,13 @@ void drawPrepareBox() {
 				printf("戎");
 			}
 			if (prepareMap[i][j] == 6) {
-				printf("戌");
+				printf("戌式");
 			}
 			if (prepareMap[i][j] == 8) {
-				printf("成");
+				printf("成式");
 			}
 			if (prepareMap[i][j] == 10) {
-				printf("扛");
+				printf("扛式");
 			}
 		}
 		printf("\n");

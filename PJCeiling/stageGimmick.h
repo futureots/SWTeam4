@@ -25,6 +25,36 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 		}
 		for (int i = 8; i < 21; i++) if (map[5][i] == 100) map[5][i] = 0;
 	}
+	//³¸¼± ¹æ Å»Ãâ
+	else if (curLevel == 7) {
+		if (x == 4 && y == 4) {
+			for (int i = 1; i < stageHeight - 1; i++) {
+				if (map[i][0] == -6) map[i][0] -= 10;
+				if (map[i][stageWidth - 1] == -6) map[i][stageWidth - 1] -= 10;
+			}
+			for (int j = 0; j < stageWidth - 1; j++) {
+				map[0][j] -= 10;
+				map[19][j] -= 10;
+			}
+			map[14][5] = 0;
+		}
+
+		else if (x == 27 && y == 16) {
+			for (int i = 11; i < 14; i++) {
+				map[i][6] = 3;
+				map[i][7] = 3;
+			}
+			for (int i = 11; i < 19; i++) {
+				map[i][8] = 3;
+			}
+			for (int i = 11; i < 19; i++) {
+				for (int j = 16; j < 25; j++)
+					map[i][j] = 0;
+			}
+			for (int i = 5; i < 10; i++)
+				map[3][i] = 0;
+		}
+	}
 	//¸Ê¿¬°á
 	else if (curLevel == 8) {
 		for (int i = 1; i < stageHeight - 1; i++) {
@@ -36,6 +66,17 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 	else if (curLevel == 9) {
 		for (int i = 3; i <= 26; i++) {
 			map[17][i] = 0;
+		}
+	}
+	//¼±Ç³±â °³Ã´
+	else if (curLevel == 12) {
+		for (int i = 1; i < stageHeight - 1; i++) {
+			if (map[i][0] == -6) map[i][0] -= 10;
+			if (map[i][stageWidth - 1] == -6) map[i][stageWidth - 1] -= 10;
+		}
+		for (int j = 0; j < stageWidth - 1; j++) {
+			map[0][j] -= 10;
+			map[19][j] -= 10;
 		}
 	}
 	//»ó½Â°ú ÇÏ°­ ±â¹Í
@@ -92,6 +133,9 @@ void changeMapFromPlugOff(int x, int y, int map[20][30], int curLevel) {
 		}
 		for (int i = 8; i < 21; i++) map[5][i] = 100;
 	}
+
+
+
 	//¸Ê¿¬°á
 	if (curLevel == 8) {
 		for (int i = 1; i < stageHeight - 1; i++) {
@@ -221,7 +265,7 @@ void fanMove(int x, int y, int map[20][30], int blockNum) {
 			idY += (fanNum % 2 == 0) ? ((fanNum == 32) ? 1 : ((fanNum == 30) ? -1 : 0)) : 0;
 		}
 		else if (map[y + idY][x + idX] == 4) return;
-
+		else if (map[y + idY][x + idX] == 100) return;
 		else if (map[y + idY][x + idX] == 2 || map[y + idY][x + idX] == 24) {
 			map[y][x] = 0;
 			map[y + idY][x + idX] = 0;

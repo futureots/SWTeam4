@@ -666,6 +666,7 @@ void LevelClear() {
 	//클리어 텍스트 출력
 	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
 	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
+	
 	Sleep(1000);
 
 	return;
@@ -1016,7 +1017,7 @@ int main() {
 	GetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 	curCursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
-	save(18);
+
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
 	displayMainMenu(); // 메인화면 표시
@@ -1072,7 +1073,7 @@ int main() {
 			//카드 구매화면 재시작 위치
 		case 2:
 			system("cls");
-			if (currentLevel < 2)
+			if (currentLevel < 3)
 			{
 				if (currentLevel == 0) {
 					deckInfo[0] = 2;
@@ -1083,6 +1084,12 @@ int main() {
 					deckInfo[2] = 4;
 					deckInfo[3] = 5;
 					deckInfo[4] = 7;
+					deckCount = 3;
+				}
+				else if (currentLevel == 2) {
+					deckInfo[0] = 12;
+					deckInfo[1] = 3;
+					deckInfo[2] = 2;
 					deckCount = 3;
 				}
 			}
@@ -1178,7 +1185,7 @@ int main() {
 				inGameDeckReset();
 				currentOption = 3;
 			}
-			_getch();
+			int t =_getch();
 		Game:
 			direction = 0;
 			hintVisible = 3;
