@@ -18,7 +18,7 @@ int cardInfo[8];
 
 //코스트를 저장하는 int값. 맵으로부터 읽어들인 총 코스트에 따라 변경.
 int costInfo;
-int costPrice[8] = { 1, 2, 5, 0, 0, 0, 0, 0 };
+int costPrice[8] = { 1, 2, 5, 3, 0, 0, 0, 0 };
 //덱의 카드 수를 저장하는 배열.
 int deckInfo[8];
 
@@ -163,7 +163,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (costInfo >= costPrice[0]) {	//코스트는 1
 				cardInfo[0]--;
 				deckInfo[0]++;
-				costInfo--;
+				costInfo = costInfo - costPrice[0];
 			}
 			else {
 				printScoreOver(costPrice[0]);
@@ -177,7 +177,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (costInfo >= costPrice[1]) {	//코스트는 2
 				cardInfo[1]--;
 				deckInfo[1]++;
-				costInfo = costInfo - 2;
+				costInfo = costInfo - costPrice[1];
 			}
 			else {
 				printScoreOver(costPrice[1]);
@@ -191,10 +191,24 @@ void detectPrepareFunc(int X, int Y) {
 			if (costInfo >= costPrice[2]) {	//코스트는 3
 				cardInfo[2]--;
 				deckInfo[2]++;
-				costInfo = costInfo - 5;
+				costInfo = costInfo - costPrice[2];
 			}
 			else {
 				printScoreOver(costPrice[2]);
+			}
+		}
+
+		//네번째 카드(그랩)
+		if (X >= cardCoord[3][0] && X <= cardCoord[3][0] + 8) {
+			if (deckInfo[3] == 0) // 처음 사는 카드면 덱카운트 증가
+				deckCount++;
+			if (costInfo >= costPrice[2]) {	//코스트는 3
+				cardInfo[3]--;
+				deckInfo[3]++;
+				costInfo = costInfo - costPrice[3];
+			}
+			else {
+				printScoreOver(costPrice[3]);
 			}
 		}
 	}
@@ -206,7 +220,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (deckInfo[0] >= 1) {
 				cardInfo[0]++;
 				deckInfo[0]--;
-				costInfo++;
+				costInfo = costInfo + costPrice[0];
 				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
 					deckCount--;
 			}
@@ -219,7 +233,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (deckInfo[1] >= 1) {
 				cardInfo[1]++;
 				deckInfo[1]--;
-				costInfo = costInfo + 2;
+				costInfo = costInfo + costPrice[1];
 				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
 					deckCount--;
 			}
@@ -232,7 +246,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (deckInfo[2] >= 1) {
 				cardInfo[2]++;
 				deckInfo[2]--;
-				costInfo = costInfo + 5;
+				costInfo = costInfo + costPrice[2];
 				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
 					deckCount--;
 			}
@@ -240,6 +254,20 @@ void detectPrepareFunc(int X, int Y) {
 				printDeckCountOver();
 			}
 		}
+		//네번째 카드(로켓)
+		if (X >= deckCoord[3][0] && X < deckCoord[3][0] + 6) {
+			if (deckInfo[3] >= 1) {
+				cardInfo[3]++;
+				deckInfo[3]--;
+				costInfo = costInfo + costPrice[3];
+				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
+					deckCount--;
+			}
+			else {
+				printDeckCountOver();
+			}
+		}
+
 	}
 
 }
@@ -263,7 +291,7 @@ void drawCardInfo() {
 	printf("로켓");
 
 	setCurrentCursorPos(cardInfoCoord[3][0], cardInfoCoord[3][1]);
-	printf("etc");
+	printf("그랩");
 }
 
 void drawDeckInfo() {
@@ -274,7 +302,7 @@ void drawDeckInfo() {
 	setCurrentCursorPos(deckInfoCoord[2][0], deckInfoCoord[2][1]);
 	printf("로켓");
 	setCurrentCursorPos(deckInfoCoord[3][0], deckInfoCoord[3][1]);
-	printf("etc");
+	printf("그랩");
 
 	for (int i = 0; i < 4; i++) {
 		setCurrentCursorPos(deckInfoCoord[i][0], deckInfoCoord[i][1] + 1);
@@ -325,6 +353,13 @@ void drawTooltip(int X, int Y) {
 			printf("로켓을 발사합니다.");
 			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
 			printf("가격은 %d코스트 입니다.", costPrice[2]);
+		}
+		//네번째 카드(그랩)
+		if (X >= cardCoord[3][0] && X <= cardCoord[3][0] + 8) {
+			eraseTooltipBox();
+			printf("맞은편 블럭을 당깁니다.");
+			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+			printf("가격은 %d코스트 입니다.", costPrice[3]);
 		}
 	}
 	//덱 정보 툴팁

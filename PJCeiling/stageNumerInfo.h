@@ -22,17 +22,14 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -4:
-		//SetConsoleTextAttribute(gScreen[gIndex], 9);
 		strcpy_s(output, 100, "┘");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -5:
-		//SetConsoleTextAttribute(gScreen[gIndex], 9);
 		strcpy_s(output, 100, "──");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -6:
-		//SetConsoleTextAttribute(gScreen[gIndex], 9);
 		strcpy_s(output, 100, "│ ");
 		Printscreen(x, y, output, curBuf);
 		break;
@@ -67,13 +64,8 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 6:
-		SetConsoleTextAttribute(curBuf, 10);
-		strcpy_s(output, 100, "∂");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 8:
 		SetConsoleTextAttribute(curBuf, 11);
-		strcpy_s(output, 100, "⌒");
+		strcpy_s(output, 100, "∂");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 10:
@@ -82,44 +74,56 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 20:
-		strcpy_s(output, 100, "┤");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 21:
-		strcpy_s(output, 100, "├");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 22:
-		strcpy_s(output, 100, "┬");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 23:
-		strcpy_s(output, 100, "┴");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 24:
-		strcpy_s(output, 100, "⊂");
-		Printscreen(x, y, output, curBuf);
-		break;
 	case 25:
-		strcpy_s(output, 100, "⊃");
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 26:
 		strcpy_s(output, 100, "∪");
 		Printscreen(x, y, output, curBuf);
 		break;
-	case 27:		
+	case 21:
+	case 26:
+		strcpy_s(output, 100, "⊂");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 22:
+		
+	case 27:
 		strcpy_s(output, 100, "∩");
 		Printscreen(x, y, output, curBuf);
 		break;
+	case 23:
+	case 28:
+		strcpy_s(output, 100, "⊃");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 24:
+		strcpy_s(output, 100, "※");
+		Printscreen(x, y, output, curBuf);
+		break;
 	case 60:
-		SetConsoleTextAttribute(curBuf, 14);
-		strcpy_s(output, 100, "§");
+		strcpy_s(output, 100, "①");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 61:
-		strcpy_s(output, 100, "▥");
+		strcpy_s(output, 100, "②");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 100:
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "▩ ");	//부술 수 없는 블록
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 101:
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "◆");	//열쇠
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 102:
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "◇");	//자물쇠블록.
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 103:
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "▣ ");	//맵 연결 아이템.
 		Printscreen(x, y, output, curBuf);
 		break;
 	default:
