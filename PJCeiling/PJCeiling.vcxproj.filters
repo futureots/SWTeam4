@@ -30,7 +30,10 @@
     <ClInclude Include="stageMapInfo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="stageNumerInfo.h">
+    <ClInclude Include="stageNumberInfo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stageTextHint.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

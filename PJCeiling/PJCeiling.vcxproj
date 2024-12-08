@@ -24,7 +24,8 @@
     <ClInclude Include="prepareScene.h" />
     <ClInclude Include="stageGimmick.h" />
     <ClInclude Include="stageMapInfo.h" />
-    <ClInclude Include="stageNumerInfo.h" />
+    <ClInclude Include="stageNumberInfo.h" />
+    <ClInclude Include="stageTextHint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />

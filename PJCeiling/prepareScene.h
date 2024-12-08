@@ -80,7 +80,7 @@ void setCurrentCursorPos(int posX, int posY);
 void drawPrepareBox();
 void printScoreOver(int index);
 void printDeckCountOver();
-void detectPrepareFunc(int X, int Y);
+void detectPrepareFunc(int X, int Y,char eventCode);
 void drawPrepareInfo();
 void drawCardInfo();
 void drawDeckInfo();
