@@ -725,8 +725,19 @@ void EndingScreen() {
 		pos.Y = i;
 		SetConsoleCursorPosition(hConsoleOut, pos);
 		printf("%s",endingImage[i]);
-		Sleep(500);
+		for (int i = 0; i < 50; i++) {
+			Sleep(10);
+			if (_kbhit() != 0) _getch();
+		}
 	}
+	pos.X = 60;
+	pos.Y = 20;
+	SetConsoleCursorPosition(hConsoleOut, pos);
+	printf("아아...");
+	pos.Y++;
+	SetConsoleCursorPosition(hConsoleOut, pos);
+	printf("익숙한 천장이다...");
+
 	_getch();
 	system("cls");
 	return;

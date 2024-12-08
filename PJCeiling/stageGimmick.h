@@ -16,12 +16,30 @@
 int isKey = 0;
 
 void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
-	if (curLevel == 9) {
+	//ºÎ¼ö°í ´ç°Ü¶ó
+	if (curLevel == 4) {
+		for (int i = 0; i < stageWidth; i++) if (map[3][i] == 100) map[3][i] = 0;
+		for (int i = 5; i < stageHeight; i++) {
+			if (map[i][8] == 100) map[i][8] = 0;
+			if (map[i][20] == 100) map[i][20] = 0;
+		}
+		for (int i = 8; i < 21; i++) if (map[5][i] == 100) map[5][i] = 0;
+	}
+	//¸Ê¿¬°á
+	else if (curLevel == 8) {
+		for (int i = 1; i < stageHeight - 1; i++) {
+			if (map[i][0] == -6) map[i][0] -= 10;
+			if (map[i][stageWidth - 1] == -6) map[i][stageWidth-1] -= 10;
+		}
+	}
+	//¼¶ Å»Ãâ
+	else if (curLevel == 9) {
 		for (int i = 3; i <= 26; i++) {
 			map[17][i] = 0;
 		}
 	}
-	else if (curLevel == 17) {//»ó½Â°ú ÇÏ°­ ±â¹Í
+	//»ó½Â°ú ÇÏ°­ ±â¹Í
+	else if (curLevel == 17) {
 		if (x == 2 && y == 11) {
 			for (int i = 1; i <= 7; i++) {
 				for (int t = 0; t < 2; t++) {
@@ -56,7 +74,8 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 			}
 		}
 	}
-	else if (curLevel == 13) { //ºí·Ï »ý¼º±â
+	//ºí·Ï »ý¼º±â
+	else if (curLevel == 13) { 
 		map[3][26] = 2;
 	}
 
@@ -64,8 +83,24 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 
 }
 void changeMapFromPlugOff(int x, int y, int map[20][30], int curLevel) {
-
-	if (curLevel == 17) {//»ó½Â°ú ÇÏ°­ ±â¹Í
+	//ºÎ¼ö°í ´ç°Ü¶ó
+	if (curLevel == 4) {
+		for (int i = 0; i < stageWidth; i++) map[3][i] = 100;
+		for (int i = 5; i < stageHeight; i++) {
+			map[i][8] = 100;
+			map[i][20] = 100;
+		}
+		for (int i = 8; i < 21; i++) map[5][i] = 100;
+	}
+	//¸Ê¿¬°á
+	if (curLevel == 8) {
+		for (int i = 1; i < stageHeight - 1; i++) {
+			if (map[i][0] == -16) map += 10;
+			if (map[i][stageWidth - 1] == -16) map += 10;
+		}
+	}
+	//»ó½Â°ú ÇÏ°­ ±â¹Í
+	else if (curLevel == 17) {
 		if (x == 2 && y == 11) {
 			for (int i = 1; i <= 7; i++) {
 				for (int t = 0; t < 2; t++) {

@@ -265,7 +265,7 @@ void drawDeckInfo() {
 		setCurrentCursorPos(deckInfoCoord[i][0], deckInfoCoord[i][1] + 1);
 		printf(" ¦¡");
 		setCurrentCursorPos(deckInfoCoord[i][0], deckInfoCoord[i][1] + 2);
-		printf("%d °³", deckInfo[i]);
+		printf("%2d °³", deckInfo[i]);
 	}
 }
 
@@ -275,7 +275,7 @@ void drawcostInfo() {
 	setCurrentCursorPos(costInfoCoord[0], costInfoCoord[1] + 1);
 	printf(" ¦¡");
 	setCurrentCursorPos(costInfoCoord[0], costInfoCoord[1] + 2);
-	printf(" %d ", costInfo);
+	printf("%3d", costInfo);
 }
 
 void eraseTooltipBox() {

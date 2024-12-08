@@ -12,7 +12,7 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		break;
 	case -2:
 		//SetConsoleTextAttribute(gScreen[gIndex], 9);
-		strcpy_s(output, 100, "жд");
+		strcpy_s(output, 100, "жд ");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -3:
@@ -21,7 +21,7 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -4:
-		strcpy_s(output, 100, "же");
+		strcpy_s(output, 100, "же ");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case -15:
