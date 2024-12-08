@@ -9,6 +9,24 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+/*
+/////////////////////////////////////추가 내용/////////////////////////////////////////
+prepareScene.h
+카드 정보 담는 구조체 추가 inGameDeckInfo
+카드 종류 수 담는 변수 deckCount 추가
+상점에서 카드 구매, 판매 deckCount에 반영하는 코드 추가
+
+
+deckSetting() deckInfo배열을 이용해서 inGameDeck에 카드 정보 저장해주는 함수
+
+mayCopy() currentMap에 stageMap의 내용을 복사해주는 함수
+		  맵 정보 사용 시 currentMap사용
+
+deckCountDown() 카드 사용시 카운트 감소해주는 함수 
+
+*/
+
+
 //마우스 좌표를 저장할 구조체
 typedef struct {
 	int X;
@@ -246,9 +264,16 @@ void setPrepareOrigininfo() {
 
 char str_text[8][35] = { 0 }; // 텍스트 박스 출력 텍스트
 int tens, ones; // 턴 박스 출력 텍스쳐 번호 // 십의자리, 일의자리
-int inGameCardInfo[8]; // 인게임에서 사용 되는 카드 정보
-int deckCount; // 카드 종류의 개수
+inGameDeckInfo inGameDeck[8];
+int currentMap[20][30];
 void deckOut();
+
+void mapCopy() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 30; j++)
+			currentMap[i][j] = stageMap[currentLevel][i][j];
+	}
+}
 
 void levelBoxOut() {
 	COORD pos = { 62, 2 };
@@ -271,7 +296,8 @@ void drawInGame(HANDLE curBuf) {
 
 	//텍스트 박스 창
 	drawBox(30, 17, 10, 20,curBuf);
-	// i 값이 카드 수
+
+	//덱 출력
 	deckOut();
 }
 void textInput(int n, char* text) {
@@ -341,46 +367,56 @@ void turnBoxOut(int num1, int num2) {
 		}
 	}
 }
+void deckSetting() {
+	int idx = 0;
+	
+	for (int i = 0; i < 8; i++) {
+		if (deckInfo[i] != 0) {
+			if (i == 0) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, "밀기");
+				inGameDeck[idx].cardType = 0;
+			}
+			else if (i == 1) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, "점프");
+				inGameDeck[idx].cardType = 1;
+			}
+			else if (i == 2) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, "로켓");
+				inGameDeck[idx].cardType = 2;
+			}
+			idx++;
+		}
+	}
+}
+
 void deckOut() {
-	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	int startX = 60;
 	int startY = 0;
 	COORD pos = { 0,0 };
-	int deckCount = 0;
-	int p = 0, idx = 0;
 
-	for (int i = 0; i < 8; i++) {
-		if (deckInfo[i] != 0) {
-			printf("%d\n", p);
-			deckCount++;
-			char cardStr[10];
-			sprintf(cardStr, "%d 개", deckInfo[i]);  // 정수를 문자열로 변환
-
-			if (i == 0) {
-				Printscreen(p * 8 + 1, 22, " 밀기", gScreen[gIndex]);
-				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
-				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
-				inGameCardInfo[idx++] = i;
-			}
-			else if (i == 1) {
-				Printscreen(p * 8 + 1, 22, " 점프", gScreen[gIndex]);
-				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
-				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
-				inGameCardInfo[idx++] = i;
-			}
-			else if (i == 2) {
-				Printscreen(p * 8 + 1, 22, " 로켓", gScreen[gIndex]);
-				Printscreen(p * 8 + 1, 23, "  ─", gScreen[gIndex]);
-				Printscreen(p * 8 + 2, 24, cardStr, gScreen[gIndex]);
-				inGameCardInfo[idx++] = i;
-			}
-			p++;
-		}
-	}
 	for (int i = 0; i < deckCount; i++) {
+		char cardStr[10];
+		sprintf(cardStr, "%d 개", inGameDeck[i].cardCount);  // 정수를 문자열로 변환
+		Printscreen(i * 8 + 2, 22, inGameDeck[i].cardName, gScreen[gIndex]);
+		Printscreen(i * 8 + 1, 23, "  ─", gScreen[gIndex]);
+		Printscreen(i * 8 + 2, 24, cardStr, gScreen[gIndex]); // pc에서 확인할 것
 		drawBox(i * 4, 21, 5, 4,gScreen[gIndex]);
+
 	}
 }
+
+void deckCountDown(int x, int y) {
+	for (int i = 0; i < deckCount; i++) {
+		if (y >= 21 && y <= 25 && x >= i * 8 + 1 && x < i * 8 + 8) {
+			if(inGameDeck[i].cardCount > 0)
+				inGameDeck[i].cardCount--;
+		}
+	}
+}
+
 //더블 버퍼를 이용해서 인게임 화면 그려주는 함수
 void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int numLevelBoxOut) {
 	screenClear();
@@ -416,7 +452,7 @@ void InitPlayer() {
 int MovePlayer(int x, int y) {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	int blockNum = stageMap[currentLevel][curY + y][curX + x];
+	int blockNum = currentMap[curY + y][curX + x];
 
 	int result = 0;
 
@@ -424,8 +460,8 @@ int MovePlayer(int x, int y) {
 	case 10: //목적지
 		result = 1;
 	case 0: //빈칸
-		stageMap[currentLevel][curY][curX] = 0;
-		stageMap[currentLevel][curY + y][curX + x] = 1;
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
 		curY += y;
 		curX += x;
 		break;
@@ -520,6 +556,7 @@ int main() {
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 
 	MousePosition mousePos;
+	save(2);
 
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
@@ -533,6 +570,7 @@ int main() {
 		//씬2
 		isSelecting = 0;
 		clearLv = load();
+		mapCopy();// 맵 복사
 		drawMap(20, 0, hConsoleOut);
 		drawLevelNameScreen();
 		drawLevelSelectPointer(1);
@@ -546,6 +584,7 @@ int main() {
 				key = _getch();
 				k = keyInput(key);
 				if (k == -1) break;
+				mapCopy();
 				drawMap(20, 0, hConsoleOut);
 			}
 			Sleep(10);
@@ -569,6 +608,7 @@ int main() {
 		setPrepareOrigininfo();
 		drawPrepareBox();
 		drawMap(20, 1, hConsoleOut);
+		deckCount = 0;
 		while (1) {
 			drawPrepareInfo();
 			// 더블클릭 위치 가져오기
@@ -594,10 +634,24 @@ int main() {
 		strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
 		strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
 
-
+		deckSetting();// 상점에서 산 카드 정보를 인게임에 업데이트 하는 함수
 		turnCountInOut(3, 0);
 		InitPlayer();
 		screenRender(1, 1, 1, 1);
+
+		
+		//인게임 카드카운트 감소 
+		while (1) {
+			mousePos = getMouseClickPosition(hConsoleInput);
+			if (mousePos.X != -1 && mousePos.Y != -1) {
+				deckCountDown(mousePos.X, mousePos.Y);
+				screenRender(1, 1, 1, 1);
+			}
+			if (inGameDeck[0].cardCount == 0 && inGameDeck[1].cardCount == 0 && inGameDeck[2].cardCount == 0)
+				break;
+		}
+		enableKeyboardInput(hConsoleInput);
+		
 		while (1) {
 			int eventCode = processInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
 			int clear = 0;
@@ -620,7 +674,6 @@ int main() {
 				direction = 3;
 				break;
 			case 'M':  // 마우스 더블클릭 이벤트 코드
-				//더블클릭 먹히는지 테스트용.
 				//return;
 				break;
 			}
@@ -636,7 +689,7 @@ int main() {
 		//Sleep(1000);
 		screenRender(1, 1, 1, 1);
 		LevelClear();
-
+		
 
 		_getch();
 
@@ -657,7 +710,7 @@ void drawMap(int startX, int startY, HANDLE curBuf) {
 	for (int i = 0; i < stageHeight; i++) {
 		pos.Y = startY + i;
 		for (int j = 0; j < stageWidth; j++) {
-			int value = stageMap[currentLevel][i][j];
+			int value = currentMap[i][j];
 			pos.X = (startX + j) * 2;
 			stageNumber(pos.X, pos.Y, value, curBuf);
 		}

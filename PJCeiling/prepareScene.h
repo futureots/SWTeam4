@@ -1,7 +1,13 @@
 #pragma once
 #include <stdio.h>
 #include<Windows.h>
+typedef struct inGameDeckInfo {
+	int cardType;
+	char cardName[10];
+	int cardCount;
+}inGameDeckInfo;
 
+int deckCount = 0; // 선택된 카드 종류의 수
 int card_size_x = 8;
 int card_size_y = 5;
 
@@ -152,6 +158,8 @@ void detectPrepareFunc(int X, int Y) {
 	if (Y >= cardCoord[0][1] && Y <= cardCoord[0][1] + 5) {
 		//첫번째 카드(밀기)
 		if (X >= cardCoord[0][0] && X <= cardCoord[0][0] + 8) {
+			if (deckInfo[0] == 0) // 처음 사는 카드면 덱카운트 증가
+				deckCount++;
 			if (costInfo >= costPrice[0]) {	//코스트는 1
 				cardInfo[0]--;
 				deckInfo[0]++;
@@ -164,6 +172,8 @@ void detectPrepareFunc(int X, int Y) {
 		
 		//두번째 카드(점프)
 		if (X >= cardCoord[1][0] && X <= cardCoord[1][0] + 8) {
+			if (deckInfo[1] == 0) // 처음 사는 카드면 덱카운트 증가
+				deckCount++;
 			if (costInfo >= costPrice[1]) {	//코스트는 2
 				cardInfo[1]--;
 				deckInfo[1]++;
@@ -176,6 +186,8 @@ void detectPrepareFunc(int X, int Y) {
 		
 		//세번째 카드(로켓)
 		if (X >= cardCoord[2][0] && X <= cardCoord[2][0] + 8) {
+			if (deckInfo[2] == 0) // 처음 사는 카드면 덱카운트 증가
+				deckCount++;
 			if (costInfo >= costPrice[2]) {	//코스트는 3
 				cardInfo[2]--;
 				deckInfo[2]++;
@@ -195,6 +207,8 @@ void detectPrepareFunc(int X, int Y) {
 				cardInfo[0]++;
 				deckInfo[0]--;
 				costInfo++;
+				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
+					deckCount--;
 			}
 			else {
 				printDeckCountOver();
@@ -206,6 +220,8 @@ void detectPrepareFunc(int X, int Y) {
 				cardInfo[1]++;
 				deckInfo[1]--;
 				costInfo = costInfo  + 2;
+				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
+					deckCount--;
 			}
 			else {
 				printDeckCountOver();
@@ -217,6 +233,8 @@ void detectPrepareFunc(int X, int Y) {
 				cardInfo[2]++;
 				deckInfo[2]--;
 				costInfo = costInfo + 5;
+				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
+					deckCount--;
 			}
 			else {
 				printDeckCountOver();
