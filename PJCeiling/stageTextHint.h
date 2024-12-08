@@ -1,15 +1,17 @@
-#pragma once
-
-char stageText[20][8][36] = {
+ï»¿#pragma once
+char stageText[20][8][50] = {
 	{
-		{"´«À» ¶ß´Ï ³¸¼±ÃµÀåÀÌ º¸ÀÎ´Ù."},
-		{"ÀÏ´Ü ¿©±â¼­ ³ª°¡¾ßÇÒ °Í °°´Ù."},
-		{"'¡Ú'ÀÌ ÀÖ´Â °÷±îÁö ÀÌµ¿ÇØº¸ÀÚ."}
+		{"ëˆˆì„ ëœ¨ë‹ˆ ë‚¯ì„ ì²œì¥ì´ ë³´ì¸ë‹¤."},
+		{"ì¼ë‹¨ ì—¬ê¸°ì„œ ë‚˜ê°€ì•¼í•  ê²ƒ ê°™ë‹¤."},
+		{"'â˜…'ì´ ìˆëŠ” ê³³ê¹Œì§€ ì´ë™í•´ë³´ì."},
+	{" "},
+		{"ê¸¸ì„ ë§‰ëŠ” ë¸”ë¡ì„ ë°€ê±°ë‚˜"},
+	{"ê±´ë„ˆë›°ì–´ì„œ ì§€ë‚˜ê°€ì."}
 	},
 	{
-		{"´Ù½Ã ´«À» ¶¸´Ù. ³¸¼± ÃµÀåÀÌ º¸ÀÎ´Ù."},
-		{"¸Ó¸®°¡ ¾ÆÇÁ´Ù."},
-		{"ÀÏ´Ü °è¼Ó Å»ÃâÇØ º¸ÀÚ."}
+		{"ë‹¤ì‹œ ëˆˆì„ ë–³ë‹¤. ë‚¯ì„  ì²œì¥ì´ ë³´ì¸ë‹¤."},
+		{"ë¨¸ë¦¬ê°€ ì•„í”„ë‹¤."},
+		{"ì¼ë‹¨ ê³„ì† íƒˆì¶œí•´ ë³´ì."}
 	},
 	{0,},
 	{0,},
@@ -29,4 +31,25 @@ char stageText[20][8][36] = {
 	{0,},
 	{0,},
 	{0,}
+};
+
+char endingImage[27][100] = {
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+
 };
