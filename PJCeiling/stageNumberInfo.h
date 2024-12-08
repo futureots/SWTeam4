@@ -151,6 +151,26 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		strcpy_s(output, 100, "◇");	//자물쇠블록.
 		Printscreen(x, y, output, curBuf);
 		break;
+	case 90:
+		SetConsoleTextAttribute(curBuf, 4);
+		strcpy_s(output, 100, "▲");	//자물쇠블록.
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 91:
+		SetConsoleTextAttribute(curBuf, 4);
+		strcpy_s(output, 100, "▶");	//자물쇠블록.
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 92:
+		SetConsoleTextAttribute(curBuf, 4);
+		strcpy_s(output, 100, "▼");	//자물쇠블록.
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 93:
+		SetConsoleTextAttribute(curBuf, 4);
+		strcpy_s(output, 100, "◀");	//자물쇠블록.
+		Printscreen(x, y, output, curBuf);
+		break;
 	default:
 		break;
 	}

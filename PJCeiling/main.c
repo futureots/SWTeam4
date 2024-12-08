@@ -28,8 +28,6 @@ int currentLevel = 0;
 int curX, curY;
 MousePosition curMousePos;
 int isClear = 0;
-
-
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
@@ -700,7 +698,7 @@ void HelpPopUp() {//실행시 새 화면 등장 및 조작법, 상호작용 등의 간단한 설명
 	for (int i = 0; i < 10; i++) {
 		stageNumber(29 + i * 2, 17, canBreak[i], menu);
 	}
-	Printscreen(10, 19, "점프 : 앞의 블럭과 관계없이 두 칸을 이동합니다.", menu);
+	Printscreen(10, 19, "점프 : 테두리를 제외한 모든 블럭을 뛰어넘어 두 칸을 이동합니다.", menu);
 	Printscreen(17, 20, "도착지점에 블럭이 있으면 이동하지 않습니다.", menu);
 	Printscreen(10, 21, "질주 : 앞에 아이템이나 블록이 있을 때 까지 이동합니다.", menu);
 	
@@ -781,15 +779,19 @@ void MissileLaunch(int x, int y, int d) {
 	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
 	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
 
+	stageNumber(x*2, y, d%10+90, gScreen[!gIndex]);
+	Sleep(30);
+	stageNumber(x*2, y, currentMap[y][x], gScreen[!gIndex]);
 	//해당 방향으로 한칸 앞에 있는 블럭 확인
 	int blockNum = currentMap[y + moveY][x + moveX];
-	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 파괴 후 재귀함수 종료
+
+	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 파괴 후 재귀함수 종료, 파괴 불가능 시 아무것도 하지않고 종료
 	if (blockNum == 0 || blockNum == 3 || blockNum == 60 || blockNum == 40) { 
 		//아이콘을 그리고 지우는 함수 필요
 		MissileLaunch(x + moveX, y + moveY, d);
 	}
 	else if (blockNum == 2 || blockNum == 4 || blockNum == 24 || blockNum == 6 || blockNum == 5 || (blockNum >= 30 && blockNum <= 33) || blockNum == 41) {
-		currentMap[y + moveY][x + moveX] == 0;
+		currentMap[y + moveY][x + moveX] = 0;
 	}
 	return;
 }
@@ -817,7 +819,12 @@ void RunPlayer() {
 	int blockNum = currentMap[curY + moveY][curX + moveX];
 	//앞에 아무것도 없을 때만 이동
 	if (blockNum == 0) {
+		int prevX = curX;
+		int prevY = curY;
 		MovePlayer(moveX, moveY);
+		stageNumber(prevX * 2, prevY, currentMap[prevY][prevX], gScreen[!gIndex]);
+		stageNumber(curX * 2, curY, currentMap[curY][curX], gScreen[!gIndex]);
+		Sleep(30);
 		RunPlayer();
 	}
 	return;
@@ -1037,9 +1044,10 @@ int main() {
 					deckCount = 1;
 				}
 				else if (currentLevel == 1) {
-					deckInfo[0] = 2;
-					deckInfo[1] = 2;
-					deckCount = 2;
+					deckInfo[2] = 4;
+					deckInfo[3] = 5;
+					deckInfo[4] = 7;
+					deckCount = 3;
 				}
 			}
 			else
@@ -1070,9 +1078,9 @@ int main() {
 			screenInit();
 			screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
 			Sleep(100);
-			//strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
-			//strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
-			//strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
+			strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
+			strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
+			strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
 
 			deckSetting();// 상점에서 산 카드 정보를 인게임에 업데이트 하는 함수
 			turnCountInOut(stageInfo[currentLevel].maxActionCount);
