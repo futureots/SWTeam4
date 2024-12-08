@@ -6,33 +6,33 @@
 #include "stage_tutorial.h"
 #include "numberTexture.h";
 #include "prepareScene.h"
+#include "stageGimmick.h"
 
-#define _CRT_SECURE_NO_WARNINGS
 
 /*
-/////////////////////////////////////추가 내용/////////////////////////////////////////
-prepareScene.h
-카드 정보 담는 구조체 추가 inGameDeckInfo
-카드 종류 수 담는 변수 deckCount 추가
-상점에서 카드 구매, 판매 deckCount에 반영하는 코드 추가
+사용 기믹
+plugAndOulet
+콘센트의 맞는 위치에 플러그가 존재 시 맵을 변화 시킴
+
+fanMove
+기본 블럭(2번)이 맞는 위치에 오면 선풍기(8)이 보이는 곳의 모든 블럭을 날려서 새로운 길을 만들어 줌
+단단한 블럭은 선풍기에 날라가지 않음
+
+용광로(5번)
+기본 블럭과 만나면 기본 블럭을 단단한 블럭으로 만들고 사라짐
 
 
-deckSetting() deckInfo배열을 이용해서 inGameDeck에 카드 정보 저장해주는 함수
-
-mayCopy() currentMap에 stageMap의 내용을 복사해주는 함수
-		  맵 정보 사용 시 currentMap사용
-
-deckCountDown() 카드 사용시 카운트 감소해주는 함수 
+단단한 블럭(4번)
+특정 기믹 수행 시 필요한 블럭
 
 */
 
-
+#define _CRT_SECURE_NO_WARNINGS
 //마우스 좌표를 저장할 구조체
 typedef struct {
 	int X;
 	int Y;
 } MousePosition;
-
 
 void drawMap(int startX, int startY, HANDLE curBuf);
 void drawBox(int startX, int startY, int height, int width, HANDLE curBuf);
@@ -42,9 +42,8 @@ int load();
 
 int currentLevel = 0;
 int curX, curY;
-int direction = 0;
 MousePosition curMousePos;
-
+int isClear = 0;
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
@@ -54,6 +53,8 @@ void setCursorPosition(int x, int y) {
 	COORD pos = { x * 2,y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
+
+
 
 
 // 화면 테두리 그리는 함수 (양쪽에서 중앙으로 이동하며 그리기)
@@ -141,7 +142,10 @@ void drawLevelNameScreen() {
 
 		COORD pos = { 10, i * 2 + 1 };
 		SetConsoleCursorPosition(hConsoleOut, pos);
-		if (clearLv >= i) printf("%s", stageInfo[i].stageName);
+		if (clearLv >= i) {
+			printf("%s", stageInfo[i].stageName);
+			if (clearLv > i) printf("★");
+		}
 		else printf("???");
 	}
 
@@ -222,7 +226,6 @@ void enableKeyboardInput(HANDLE hConsoleInput) {
 	// 콘솔 입력 모드를 키보드 입력으로.
 	SetConsoleMode(hConsoleInput, ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT);
 }
-
 //더블클릭했을 때 마우스 좌표를 반환하는 함수.
 //도움말 기능 포함.
 MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
@@ -232,6 +235,7 @@ MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
 
 	// 콘솔 입력 모드에서 마우스 입력을 활성화.
 	SetConsoleMode(hConsoleInput, ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
+
 	while (1) {
 		ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
 
@@ -292,10 +296,10 @@ void drawInGame(HANDLE curBuf) {
 	drawBox(30, 0, 5, 12, curBuf);
 
 	// 남은 턴 수 창
-	drawBox(30, 5, 12, 20,curBuf);
+	drawBox(30, 5, 12, 20, curBuf);
 
 	//텍스트 박스 창
-	drawBox(30, 17, 10, 20,curBuf);
+	drawBox(30, 17, 10, 20, curBuf);
 
 	//덱 출력
 	deckOut();
@@ -369,7 +373,7 @@ void turnBoxOut(int num1, int num2) {
 }
 void deckSetting() {
 	int idx = 0;
-	
+
 	for (int i = 0; i < 8; i++) {
 		if (deckInfo[i] != 0) {
 			if (i == 0) {
@@ -403,7 +407,7 @@ void deckOut() {
 		Printscreen(i * 8 + 2, 22, inGameDeck[i].cardName, gScreen[gIndex]);
 		Printscreen(i * 8 + 1, 23, "  ─", gScreen[gIndex]);
 		Printscreen(i * 8 + 2, 24, cardStr, gScreen[gIndex]); // pc에서 확인할 것
-		drawBox(i * 4, 21, 5, 4,gScreen[gIndex]);
+		drawBox(i * 4, 21, 5, 4, gScreen[gIndex]);
 
 	}
 }
@@ -411,7 +415,7 @@ void deckOut() {
 void deckCountDown(int x, int y) {
 	for (int i = 0; i < deckCount; i++) {
 		if (y >= 21 && y <= 25 && x >= i * 8 + 1 && x < i * 8 + 8) {
-			if(inGameDeck[i].cardCount > 0)
+			if (inGameDeck[i].cardCount > 0)
 				inGameDeck[i].cardCount--;
 		}
 	}
@@ -437,28 +441,115 @@ void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int n
 
 
 #pragma region InGameFunc
-void InitPlayer() {
-	for (int i = 0; i < stageHeight; i++) {
-		for (int j = 0; j < stageWidth; j++) {
-			if (stageMap[currentLevel][i][j] == 1) {
-				curX = j;
-				curY = i;
-				break;
-			}
-		}
+//기본 블럭 이동
+void MoveBlock(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//움직일 블럭 위치
+	int blockNum = currentMap[y + moveY][x + moveX];
+	if (blockNum != 2 && blockNum != 21 && blockNum != 4) return;
+	//이동한 블럭의 도착점
+	int destinationNum = currentMap[y + 2 * moveY][x + 2 * moveX];
+
+	if (destinationNum != 0 && destinationNum != 3 && destinationNum != 5 && destinationNum != 6) return;
+
+	//도착점이 빈공간이면 이동
+	if (destinationNum == 0) {
+		currentMap[y + 2 * moveY][x + 2 * moveX] = blockNum;
+		currentMap[y + moveY][x + moveX] = 0;
 	}
+	// 도착점이 구멍일때 움직이는 블럭이 기본 블럭이면 서로 합체
+	else if (destinationNum == 3) {
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 0;
+	}
+	//도착점이 용광로일때 기본 블럭을 단단한 블록으로 업그레이드
+	else if (destinationNum == 5) {
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 4;
+	}
+	else if(destinationNum == 6 && blockNum == 4)
+	{
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 4;
+	}
+	//기믹 체크
+	if (blockNum >= 20 && blockNum <= 23) {
+		plugAndOutlet(x + 2 * moveX, y + 2 * moveY, currentLevel, currentMap);
+	}
+	if (blockNum == 2) {
+		fanMove(x + 2 * moveX, y + 2 * moveY, currentLevel, currentMap);
+	}
+
 }
+void JumpPlayer() {
+	//direction으로 이동방향 계산
+	int moveX = direction % 2 == 0 ? 0 : direction > 2 ? -1 : 1;
+	int moveY = direction % 2 == 1 ? 0 : direction > 1 ? 1 : -1;
+	//건너뛸 블럭(테두리는 건너뛰지 못함)
+	int blockNum = currentMap[curY + moveY][curX + moveX];
+	if (blockNum <= -1 && blockNum >= -6) return;
+	//플레이어의 착지 위치 착지 불가능 하면 반환
+	int destinationNum = currentMap[curY + 2 * moveY][curX + 2 * moveX];
+	if (destinationNum != 0 && destinationNum != 10) return;
+	//해당방향으로 이동 후 현재 위치 갱신
+	currentMap[curY][curX] = 0;
+	currentMap[curY + 2 * moveY][curX + 2 * moveX] = 1;
+	curX += 2 * moveX;
+	curY += 2 * moveY;
+	if (destinationNum == 10) isClear = 1; //착지지점이 도착지점일 경우 레벨클리어
+	return;
+}
+void MissileLaunch(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//해당 방향으로 한칸 앞에 있는 블럭 확인
+	int blockNum = currentMap[y + moveY][x + moveX];
+	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 파괴 후 재귀함수 종료
+	if (blockNum == 0 || blockNum == 3) { 
+		//아이콘을 그리고 지우는 함수 필요
+		MissileLaunch(x + moveX, y + moveY, d);
+	}
+	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum < 30)
+			||blockNum == 8) return; //도착지점과 테두리, 기믹블록들은은 부수지 못함
+	else { 
+		currentMap[y + moveY][x + moveX] = 0;
+	}
+	return;
+}
+void PullBlock(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//해당 방향으로 한칸 앞에 있는 블럭 확인
+	int blockNum = currentMap[y + moveY][x + moveX];
+	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 한칸 앞으로 당긴 후 재귀함수 종료
+	if (blockNum == 0 || blockNum == 3 || blockNum == 5) {
+		PullBlock(x + moveX, y + moveY, d);
+	}
+	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 24 && blockNum <= 27)) return;
+	else {
+		MoveBlock(x + 2 * moveX, y + 2 * moveY, d % 2 + (1 - d / 2) * 2);// 블럭을 반대방향에서 미는 함수
+	}
+	return;
+}
+
+
 //플레이어 이동
-int MovePlayer(int x, int y) {
+void MovePlayer(int x, int y) {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	int blockNum = currentMap[curY + y][curX + x];
 
-	int result = 0;
 
 	switch (blockNum) {
 	case 10: //목적지
-		result = 1;
+		isClear = 1;
 	case 0: //빈칸
 		currentMap[curY][curX] = 0;
 		currentMap[curY + y][curX + x] = 1;
@@ -472,28 +563,50 @@ int MovePlayer(int x, int y) {
 	case 30://행동횟수 늘리는 아이템 
 		//행동카드 갯수 늘리는 함수
 		break;
-
+	case 2: // 일반 블럭
+		MoveBlock(curX, curY, direction);
+		break;
 	case 3: // 구멍
-		//함수
+		JumpPlayer();
 		break;
-
-	case -1: case -2: case -3: case -4: case -5: case -6: //fix테두리
-		//함수
+	case 4:
+		MoveBlock(curX, curY, direction);
 		break;
-
-	case 20: case 21: case 22: case 23: case 24: // 배터리 플러그 블록
-		//함수
+	case 6:
+		slimeSplit(curX, curY, currentMap);
 		break;
-
+	case 20: // 배터리 블럭
+		MoveBlock(curX, curY, direction);
+		break;
+	case 21: // 배터리 블럭
+		MoveBlock(curX, curY, direction);
+		break;
+	case 22: // 배터리 블럭
+		MoveBlock(curX, curY, direction);
+		break;
+	case 23: // 배터리 블럭
+		MoveBlock(curX, curY, direction);
+		break;
+	case 60:
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
+		isKey = 1;
+		curY += y;
+		curX += x;
+		break;
+	case 61:
+		unlockBox(curX + x, curY + y, currentMap);
 	default:
 		break;
 
 	}
-	return result;
+
+	return;
 }
 
 void LevelClear() {
-	for (int i = 0; i < 12; i++) {
+	//텍스트 박스 출력 애니메이션
+	for (int i = 0; i < 11; i++) {
 		if (_kbhit()) break;
 		drawBox(24 - i * 1, 11, 5, 2 + i * 2, gScreen[!gIndex]);
 		drawBlank(25 - i * 1, 12, 3, i * 2, gScreen[!gIndex]);
@@ -501,44 +614,51 @@ void LevelClear() {
 	}
 	drawBox(13, 11, 5, 24, gScreen[!gIndex]);
 	drawBlank(14, 12, 3, 22, gScreen[!gIndex]);
+	//클리어 텍스트 출력
 	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
-	if (load() <= currentLevel) save(currentLevel + 1);
+	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
 	Sleep(1000);
 
 	return;
 
 }
 
+
+
 #pragma endregion
+
 #pragma region inGameProcessInput
 int processInputs(HANDLE hConsoleInput) {
-    INPUT_RECORD inputRecord;
-    DWORD events;
-    
-    // 콘솔 입력 모드에서 마우스와 키보드 모두 입력받음
-    SetConsoleMode(hConsoleInput, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
-    
-    while (1) {
-        ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
+	INPUT_RECORD inputRecord;
+	DWORD events;
 
-        if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
-            // 키보드 입력
-            switch (inputRecord.Event.KeyEvent.wVirtualKeyCode) {
-                case 'W': case 'w': return 'w';
-                case 'A': case 'a': return 'a';
-                case 'S': case 's': return 's';
-                case 'D': case 'd': return 'd';
-            }
-        } else if (inputRecord.EventType == MOUSE_EVENT) {
-            // 마우스 입력
-            MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
-            if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
-                curMousePos.X = mouseEvent.dwMousePosition.X;
-                curMousePos.Y = mouseEvent.dwMousePosition.Y;
-                return 'M';	//더블클릭 발생시 M반환. 나머지는 main에서 처리.
-            }
-        }
-    }
+	// 콘솔 입력 모드에서 마우스와 키보드 모두 입력받음
+	SetConsoleMode(hConsoleInput, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
+
+	while (1) {
+		ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
+
+		if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
+			// 키보드 입력
+			switch (inputRecord.Event.KeyEvent.wVirtualKeyCode) {
+			case 'W': case 'w': return 'w';
+			case 'A': case 'a': return 'a';
+			case 'S': case 's': return 's';
+			case 'D': case 'd': return 'd';
+			case 'Q': case 'q': return 'q';
+			case 'E': case 'e': return 'e';
+			}
+		}
+		else if (inputRecord.EventType == MOUSE_EVENT) {
+			// 마우스 입력
+			MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
+			if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
+				curMousePos.X = mouseEvent.dwMousePosition.X;
+				curMousePos.Y = mouseEvent.dwMousePosition.Y;
+				return 'M';	//더블클릭 발생시 M반환. 나머지는 main에서 처리.
+			}
+		}
+	}
 }
 #pragma endregion
 
@@ -556,7 +676,6 @@ int main() {
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 
 	MousePosition mousePos;
-	save(2);
 
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
@@ -570,7 +689,9 @@ int main() {
 		//씬2
 		isSelecting = 0;
 		clearLv = load();
+
 		mapCopy();// 맵 복사
+
 		drawMap(20, 0, hConsoleOut);
 		drawLevelNameScreen();
 		drawLevelSelectPointer(1);
@@ -584,7 +705,9 @@ int main() {
 				key = _getch();
 				k = keyInput(key);
 				if (k == -1) break;
+
 				mapCopy();
+
 				drawMap(20, 0, hConsoleOut);
 			}
 			Sleep(10);
@@ -608,7 +731,6 @@ int main() {
 		setPrepareOrigininfo();
 		drawPrepareBox();
 		drawMap(20, 1, hConsoleOut);
-		deckCount = 0;
 		while (1) {
 			drawPrepareInfo();
 			// 더블클릭 위치 가져오기
@@ -624,9 +746,10 @@ int main() {
 		enableKeyboardInput(hConsoleInput);
 
 
-		//씬 4
-		int currentMap[20][30] = { 0, }; // 레벨 클리어 후 맵이 초기화 되야함
 
+		//씬 4
+		isClear = 0;
+		isKey = 0;
 		screenInit();
 		screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
 		Sleep(100);
@@ -636,11 +759,13 @@ int main() {
 
 		deckSetting();// 상점에서 산 카드 정보를 인게임에 업데이트 하는 함수
 		turnCountInOut(3, 0);
-		InitPlayer();
-		screenRender(1, 1, 1, 1);
 
+
+		curX = stageInfo[currentLevel].spawnX;
+		curY = stageInfo[currentLevel].spawnY;
+		screenRender(1, 1, 1, 1);
 		
-		//인게임 카드카운트 감소 
+		/*
 		while (1) {
 			mousePos = getMouseClickPosition(hConsoleInput);
 			if (mousePos.X != -1 && mousePos.Y != -1) {
@@ -651,56 +776,56 @@ int main() {
 				break;
 		}
 		enableKeyboardInput(hConsoleInput);
-		
+		*/
 		while (1) {
 			int eventCode = processInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
-			int clear = 0;
-
 			switch (eventCode) {
-			case 'w':
-				clear = MovePlayer(0, -1);
+			case 'w': // 위로 이동
 				direction = 0;
+				MovePlayer(0, -1);//해당 위치가 도착지점이면 1, 아니면 0;
 				break;
-			case 's':
-				clear = MovePlayer(0, 1);
+			case 'd': // 오른쪽으로 이동
 				direction = 1;
+				MovePlayer(1, 0);
 				break;
-			case 'a':
-				clear = MovePlayer(-1, 0);
+			case 's': // 아래로 이동
 				direction = 2;
+				MovePlayer(0, 1);
 				break;
-			case 'd':
-				clear = MovePlayer(1, 0);
+			case 'a': // 왼쪽으로 이동
 				direction = 3;
+				MovePlayer(-1, 0);
 				break;
-			case 'M':  // 마우스 더블클릭 이벤트 코드
-				//return;
+			case 'q':
+				MissileLaunch(curX, curY, direction);
+				break;
+			case 'e':
+				PullBlock(curX, curY, direction);
+				break;
+			case 't':
+				JumpPlayer();
 				break;
 			}
 
-			if (clear)break;
 			if (eventCode != 'M') {
 				turnCountDown();
 			}
 			screenRender(1, 1, 1, 1);
+			if (isClear)break;
 		}
 
-		tens = 4, ones = 8; // 턴 상태창 숫자 설정
-		//Sleep(1000);
-		screenRender(1, 1, 1, 1);
 		LevelClear();
 		
-
 		_getch();
-
+		direction = 0;
 		screenRelease();
-
-		//save(load()+1); //다음 레벨 열기
+		
 	}
 	system("cls");
 
 	return 0;
 }
+
 #pragma region CMFunction
 
 void drawMap(int startX, int startY, HANDLE curBuf) {

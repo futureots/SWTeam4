@@ -1,13 +1,14 @@
 #pragma once
 #include <stdio.h>
 #include<Windows.h>
+
 typedef struct inGameDeckInfo {
 	int cardType;
 	char cardName[10];
 	int cardCount;
 }inGameDeckInfo;
 
-int deckCount = 0; // 선택된 카드 종류의 수
+int deckCount = 0;
 int card_size_x = 8;
 int card_size_y = 5;
 
@@ -18,7 +19,6 @@ int cardInfo[8];
 //코스트를 저장하는 int값. 맵으로부터 읽어들인 총 코스트에 따라 변경.
 int costInfo;
 int costPrice[8] = { 1, 2, 5, 0, 0, 0, 0, 0 };
-
 //덱의 카드 수를 저장하는 배열.
 int deckInfo[8];
 
@@ -169,7 +169,7 @@ void detectPrepareFunc(int X, int Y) {
 				printScoreOver(costPrice[0]);
 			}
 		}
-		
+
 		//두번째 카드(점프)
 		if (X >= cardCoord[1][0] && X <= cardCoord[1][0] + 8) {
 			if (deckInfo[1] == 0) // 처음 사는 카드면 덱카운트 증가
@@ -183,7 +183,7 @@ void detectPrepareFunc(int X, int Y) {
 				printScoreOver(costPrice[1]);
 			}
 		}
-		
+
 		//세번째 카드(로켓)
 		if (X >= cardCoord[2][0] && X <= cardCoord[2][0] + 8) {
 			if (deckInfo[2] == 0) // 처음 사는 카드면 덱카운트 증가
@@ -219,7 +219,7 @@ void detectPrepareFunc(int X, int Y) {
 			if (deckInfo[1] >= 1) {
 				cardInfo[1]++;
 				deckInfo[1]--;
-				costInfo = costInfo  + 2;
+				costInfo = costInfo + 2;
 				if (deckInfo[0] == 0) // 다 판매한 카드면 덱카운트 감소
 					deckCount--;
 			}
@@ -346,11 +346,10 @@ void drawTooltip(int X, int Y) {
 		printf("더블클릭시 덱을 확정합니다.");
 	}
 	//맵 툴팁
-	if (Y >= 1 && Y < 21 && X >= 40 && X <= 140 ){
+	if (Y >= 1 && Y < 21 && X >= 40 && X <= 140) {
 		eraseTooltipBox();
 		printf("이번에 플레이할 맵입니다.");
 		setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
 		printf("덱을 만들어 미로를 풀어 보세요!");
 	}
 }
-
