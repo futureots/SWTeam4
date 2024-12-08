@@ -18,6 +18,17 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="doubleBuffering.h" />
+    <ClInclude Include="numberTexture.h" />
+    <ClInclude Include="prepareScene.h" />
+    <ClInclude Include="stageGimmick.h" />
+    <ClInclude Include="stageMapInfo.h" />
+    <ClInclude Include="stageNumerInfo.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -126,15 +137,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="doubleBuffering.h" />
-    <ClInclude Include="numberTexture.h" />
-    <ClInclude Include="stageNumerInfo.h" />
-    <ClInclude Include="stage_tutorial.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -21,7 +21,13 @@
     <ClInclude Include="numberTexture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="stage_tutorial.h">
+    <ClInclude Include="prepareScene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stageGimmick.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stageMapInfo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="stageNumerInfo.h">

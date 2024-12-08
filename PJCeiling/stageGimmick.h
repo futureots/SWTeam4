@@ -1,6 +1,6 @@
 #pragma once
 #include <windows.h>
-#include "stage_tutorial.h"
+#include "stageMapInfo.h"
 #include "doubleBuffering.h"
 
 //20 ∪ -> 활성화 25
@@ -14,11 +14,14 @@
 // 29
 
 int isKey = 0;
-int isPortal = 0;	// 연결 테두리 이외에 포탈을 활용할 변수. 현재 사용 X
 
 void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
-
-	if (curLevel == 2) {
+	if (curLevel == 4) {
+			for (int i = 3; i <= 26; i++) {
+				map[17][i] = 0;
+			}
+	}
+	else if (curLevel == 7) {//상승과 하강 기믹
 		if (x == 2 && y == 11) {
 			for (int i = 1; i <= 7; i++) {
 				for (int t = 0; t < 2; t++) {
@@ -53,7 +56,8 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 			}
 		}
 	}
-	else if (curLevel == 3) {
+
+	/*else if (curLevel == 3) {
 		if (x == 8 && y == 4) {
 			for (int i = 13; i <= 17; i++) {
 				if (map[4][i] == 3)	map[4][i] = 0;
@@ -64,14 +68,14 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 			}
 
 		}
-	}
+	}*/
 
 
 
 }
 void changeMapFromPlugOff(int x, int y, int map[20][30], int curLevel) {
 
-	if (curLevel == 2) {
+	if (curLevel == 7) {//상승과 하강 기믹
 		if (x == 2 && y == 11) {
 			for (int i = 1; i <= 7; i++) {
 				for (int t = 0; t < 2; t++) {
@@ -192,7 +196,7 @@ void fanMove(int x, int y, int map[20][30]) {
 			idX += (blockNum % 2 == 1) ? ((blockNum == 31) ? 1 : ((blockNum == 33) ? -1 : 0)) : 0;
 			idY += (blockNum % 2 == 0) ? ((blockNum == 32) ? 1 : ((blockNum == 30) ? -1 : 0)) : 0;
 		}
-		else if (map[y + idY][x + idX] == 2 && map[y + idY][x + idX] == 24) {
+		else if (map[y + idY][x + idX] == 2 || map[y + idY][x + idX] == 24) {
 			map[y + idY][x + idX] = 0;
 			break;
 		}
@@ -207,52 +211,17 @@ void slimeSplit(int x, int y, int map[20][30]) {
 				map[y + i][x + j] = 6;
 		}
 }
-
+void ClearSwitch(int map[20][30]) {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 30; j++) {
+			if (map[i][j] == 41 || map[i][j] == 40) map[i][j] = 0;
+		}
+	}
+}
 void unlockBox(int x, int y, int map[20][30]) {
 	if (map[y][x] == 61) {
 		map[y][x] = 0;
 		if(isKey > 0)
 			isKey--;
 	}
-}
-
-void switchOn(int map[20][30]) {
-		for (int i = 0; i < 20; i++) {
-			for (int j = 0; j < 30; j++) {
-				if (map[i][j] == 41 || map[i][j] == 40) {
-					map[i][j] = 0;
-				}
-			}
-		}
-}
-
-void outlinePortalOn(int map[20][30]) {
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 30; j++) {
-			switch (map[i][j]) {
-			case -1:
-				map[i][j] = -11;
-				break;
-			case -2:
-				map[i][j] = -12;
-				break;
-			case -3:
-				map[i][j] = -13;
-				break;
-			case -4:
-				map[i][j] = -14;
-				break;
-			case -5:
-				map[i][j] = -15;
-				break;
-			case -6:
-				map[i][j] = -16;
-				break;
-			}
-		}
-	}
-}
-
-void outlinePortal(int x, int y, int map[20][30]) {
-	//함수화
 }
