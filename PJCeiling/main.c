@@ -154,9 +154,9 @@ void drawLevelNameScreen() {
 	printf("선택");
 }
 //현재 선택하고 있는 레벨 표시
-void drawLevelSelectPointer(int b) {
+void drawSelectPointer(int b) {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD pos = { 7,currentLevel * 2 + 1 };
+	COORD pos = { 7, currentLevel*2+1 };
 	SetConsoleCursorPosition(hConsoleOut, pos);
 	if (b) printf(">");
 	else printf("  ");
@@ -179,26 +179,29 @@ void selectLevel(int k) {
 	return;
 }
 int keyInput(int key) {
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	switch (key)// w = 119, a = 97, s = 115, d = 100
 	{
+	case 27:
 	case 97:
 		isSelecting = isSelecting > 0 ? isSelecting - 1 : 0;
 		break;
 	case 119:
 		if (isSelecting == 0) {
-			drawLevelSelectPointer(0);
+			drawSelectPointer(0);
 			currentLevel = currentLevel > 0 ? currentLevel - 1 : 0;
-			drawLevelSelectPointer(1);
+			drawSelectPointer(1);
 		}
 		break;
 	case 115:
 		if (isSelecting == 0) {
-			drawLevelSelectPointer(0);
+			drawSelectPointer(0);
 			int accessMax = clearLv >= stageLength - 1 ? stageLength - 1 : clearLv;
 			currentLevel = currentLevel < accessMax ? currentLevel + 1 : accessMax;
-			drawLevelSelectPointer(1);
+			drawSelectPointer(1);
 		}
 		break;
+	case 32:
 	case 100:
 		isSelecting = isSelecting < 2 ? isSelecting + 1 : 2;
 		break;
@@ -222,12 +225,682 @@ int keyInput(int key) {
 //씬3 관련 함수
 #pragma region CardSelectSceneFunction
 
-void enableKeyboardInput(HANDLE hConsoleInput) {
-	// 콘솔 입력 모드를 키보드 입력으로.
-	SetConsoleMode(hConsoleInput, ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT);
+void setPrepareOrigininfo() {
+	costInfo = stageInfo[currentLevel].cost;
+	for (int i = 0; i < 8; i++) {
+		deckInfo[i] = 0;
+	}
 }
+
+#pragma endregion
+//씬4 관련 함수
+#pragma region InGameSceneFunc
+
+char str_text[8][35] = { 0 }; // 텍스트 박스 출력 텍스트
+int tens, ones; // 턴 박스 출력 텍스쳐 번호 // 십의자리, 일의자리
+inGameDeckInfo inGameDeck[8];
+int currentMap[20][30];
+void deckOut();
+int turnCountText;
+
+int curDeckCoord[8][2];
+
+void mapCopy() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 30; j++)
+			currentMap[i][j] = stageMap[currentLevel][i][j];
+	}
+}
+
+void levelBoxOut() {
+	COORD pos = { 62, 2 };
+	Printscreen(pos.X, pos.Y, stageInfo[currentLevel].stageName, gScreen[gIndex]);
+}
+
+// 인게임 화면 출력
+void drawInGame(HANDLE curBuf) {
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	int startX = 60;
+	int startY = 0;
+	COORD pos = { 0,0 };
+	drawMap(0, 0, curBuf);
+
+	//스테이지 레벨 창
+	drawBox(30, 0, 5, 20, curBuf);
+
+	// 남은 턴 수 창
+	drawBox(30, 5, 12, 20, curBuf);
+
+	//텍스트 박스 창
+	drawBox(30, 17, 10, 20, curBuf);
+
+
+	//덱 출력
+	deckOut();
+}
+
+void textInput(int n, char* text) {
+	strcpy_s(str_text[n], 35, text);
+}
+
+//텍스트 출력 함수
+void textBoxOut(char text[][35]) {
+	COORD pos = { 0, 0 };
+	int startY = 18;
+	pos.X = 62;
+	for (int i = 0; i < 8; i++) {
+		if (text[i][0] == '\0') // 첫 번째 문자가 널 문자라면 종료
+			break;
+
+		pos.Y = startY + i;
+
+		Printscreen(pos.X, pos.Y, text[i], gScreen[gIndex]);
+	}
+}
+
+void turnCountInOut(int n) {
+	turnCountText = n;
+}
+
+void turnCountDown() {
+	if (turnCountText > 0)
+		turnCountText--;
+}
+
+void turnBoxOut(int n) {
+	COORD pos = { 0, 0 };
+	char output[100];
+	int startY = 6;
+	int startX = 67;
+
+	for (int i = 0; i < 9; i++) {
+		pos.Y = startY + i;
+		for (int j = 0; j < 5; j++) {
+			pos.X = startX + j;
+			if (numberTexture[n / 100][i][j] == 1) {
+				strcpy_s(output, 3, "#");
+				Printscreen(pos.X, pos.Y, "#", gScreen[gIndex]);
+			}
+			else {
+				strcpy_s(output, 3, " ");
+				Printscreen(pos.X, pos.Y, " ", gScreen[gIndex]);
+			}
+		}
+	}
+	startX = 77;
+	for (int i = 0; i < 9; i++) {
+		pos.Y = startY + i;
+		for (int j = 0; j < 5; j++) {
+			pos.X = startX + j;
+			if (numberTexture[n % 100 / 10][i][j] == 1) {
+				strcpy_s(output, 3, "#");
+				Printscreen(pos.X, pos.Y, "#", gScreen[gIndex]);
+			}
+			else {
+				strcpy_s(output, 3, " ");
+				Printscreen(pos.X, pos.Y, " ", gScreen[gIndex]);
+			}
+		}
+	}
+	startX = 87;
+	for (int i = 0; i < 9; i++) {
+		pos.Y = startY + i;
+		for (int j = 0; j < 5; j++) {
+			pos.X = startX + j;
+			if (numberTexture[n % 10][i][j] == 1) {
+				strcpy_s(output, 3, "#");
+				Printscreen(pos.X, pos.Y, "#", gScreen[gIndex]);
+			}
+			else {
+				strcpy_s(output, 3, " ");
+				Printscreen(pos.X, pos.Y, " ", gScreen[gIndex]);
+			}
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////
+void itemInfoOut() {
+	COORD pos = { 62, 25 };
+	char text[10];
+	sprintf(text, "key : %d개", isKey);
+
+	Printscreen(pos.X, pos.Y, text, gScreen[gIndex]);
+}
+
+void deckSetting() {
+	int idx = 0;
+
+	for (int i = 0; i < 6; i++) {
+		if (deckInfo[i] != 0) {
+			if (i == 0) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, " 밀기");
+				inGameDeck[idx].cardType = 0;
+			}
+			else if (i == 1) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, " 점프");
+				inGameDeck[idx].cardType = 1;
+			}
+			else if (i == 2) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, " 로켓");
+				inGameDeck[idx].cardType = 2;
+			}
+			else if (i == 3) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, " 그랩");
+				inGameDeck[idx].cardType = 3;
+			}
+			else if (i == 4) {
+				inGameDeck[idx].cardCount = deckInfo[i];
+				strcpy_s(inGameDeck[idx].cardName, 10, " 질주");
+				inGameDeck[idx].cardType = 4;
+			}
+			idx++;
+		}
+	}
+}
+
+void resetDeckCoord() {
+	for (int i = 0; i < 8; i++) {
+		curDeckCoord[i][0] = -1;
+		curDeckCoord[i][1] = -1;
+	}
+}
+
+void setCurDeckCoord(int cardIdx, int X, int Y) {
+	curDeckCoord[cardIdx][0] = X;
+	curDeckCoord[cardIdx][1] = Y;
+}
+
+void deckOut() {
+	for (int i = 0; i < deckCount; i++) {
+		char cardStr[10];
+		sprintf(cardStr, "%d 개", inGameDeck[i].cardCount);  // 정수를 문자열로 변환
+		Printscreen(i * 8 + 2, 22, inGameDeck[i].cardName, gScreen[gIndex]);
+		Printscreen(i * 8 + 1, 23, "   ─", gScreen[gIndex]);
+		Printscreen(i * 8 + 2, 24, cardStr, gScreen[gIndex]); // pc에서 확인할 것
+		drawBox(i * 4, 21, 5, 5, gScreen[gIndex]);
+		setCurDeckCoord(i, i * 8, 21);
+	}
+}
+
+
+void MoveBlock(int x, int y, int d);
+void JumpPlayer();
+void MissileLaunch(int x, int y, int d);
+void PullBlock(int x, int y, int d);
+void RunPlayer();
+
+void useDeck(char eventCode) {
+	eventCode = eventCode - '0';
+	for (int i = 0; i < deckCount; i++) {
+		if (inGameDeck[i].cardType == eventCode - 1) {
+			if (inGameDeck[i].cardCount > 0) {
+				switch (eventCode) {
+				case 1:
+					MoveBlock(curX, curY, direction);
+					break;
+				case 2:
+					JumpPlayer();
+					break;
+				case 3:
+					MissileLaunch(curX, curY, direction);
+					break;
+				case 4:
+					PullBlock(curX, curY, direction);
+					break;
+				case 5:
+					RunPlayer();
+					break;
+				case 6:
+					break;
+				}
+				inGameDeck[i].cardCount--;
+			}
+		}
+	}
+}
+
+
+
+
+void inGameDeckReset() {
+	for (int i = 0; i < 8; i++) {
+		deckInfo[i] = 0;
+		inGameDeck[i].cardCount = 0;
+	}
+	deckCount = 0;
+}
+
+//더블 버퍼를 이용해서 인게임 화면 그려주는 함수
+void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int numLevelBoxOut) {
+	screenClear();
+	if (numDrawInGame)
+		drawInGame(gScreen[gIndex]); // 임시버퍼에 인게임 화면 그리기
+	if (numTextBoxOut)
+		textBoxOut(str_text);
+	if (numTurnBoxOut)
+		turnBoxOut(turnCountText);
+	if (numLevelBoxOut)
+		levelBoxOut();
+	if (itemInfoOut)
+		itemInfoOut();
+	screenFlipping();
+}
+
+
+
+#pragma endregion
+
+
+#pragma region PopUpFunc
+int ShowPauseAndMenu() { 
+	int currentSelectOption = 0;
+	/*HANDLE menu; // 새 화면 만들어서 해도 됨 => 지금 안함
+	CONSOLE_CURSOR_INFO cci;
+	menu = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	cci.dwSize = 1;
+	cci.bVisible = FALSE;
+	SetConsoleCursorInfo(menu, &cci);
+	SetConsoleActiveScreenBuffer(menu);*/
+
+	for (int i = 0; i < 11; i++) {
+		if (_kbhit()) break;
+		drawBox(24 - i * 1, 8, 11, 2 + i * 2, gScreen[!gIndex]);
+		drawBlank(25 - i * 1, 9, 9, i * 2, gScreen[!gIndex]);
+		Sleep(100);
+	}
+	drawBox(13, 8, 11, 24, gScreen[!gIndex]);
+	drawBlank(14, 9, 9, 22, gScreen[!gIndex]);
+	//옵션 출력
+	Printscreen(38, 10, "계속", gScreen[!gIndex]);
+	Printscreen(38, 12, "다시하기", gScreen[!gIndex]);
+	Printscreen(38, 14, "카드 구매 다시하기", gScreen[!gIndex]);
+	Printscreen(38, 16, "레벨 선택 화면으로 돌아가기", gScreen[!gIndex]);
+
+	Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
+	while (1) {
+		int key = 0;
+		if (_kbhit() != 0) {
+			key = _getch();
+			switch (key)
+			{
+			case 27:
+				currentSelectOption = 0;
+			case 32:
+				if (currentSelectOption == 0) {
+					screenRender(1, 1, 1, 1);
+					return 0;
+				}
+				else return currentSelectOption;
+			case 'w':
+				Printscreen(34, currentSelectOption * 2 + 10, "  ", gScreen[!gIndex]);
+				currentSelectOption = currentSelectOption > 0 ? currentSelectOption - 1 : 0;
+				Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
+				break;
+			case 's':
+				Printscreen(34, currentSelectOption * 2 + 10, "  ", gScreen[!gIndex]);
+				currentSelectOption = currentSelectOption < 3 ? currentSelectOption + 1 : 3;
+				Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+int ShowRestartMenu() {
+	int currentSelectOption = 0;
+	/*HANDLE menu; // 새 화면 만들어서 해도 됨 => 지금 안함
+	CONSOLE_CURSOR_INFO cci;
+	menu = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	cci.dwSize = 1;
+	cci.bVisible = FALSE;
+	SetConsoleCursorInfo(menu, &cci);
+	SetConsoleActiveScreenBuffer(menu);*/
+
+	for (int i = 0; i < 11; i++) {
+		if (_kbhit()) break;
+		drawBox(24 - i * 1, 8, 11, 2 + i * 2, gScreen[!gIndex]);
+		drawBlank(25 - i * 1, 9, 9, i * 2, gScreen[!gIndex]);
+		Sleep(100);
+	}
+	drawBox(13, 8, 11, 24, gScreen[!gIndex]);
+	drawBlank(14, 9, 9, 22, gScreen[!gIndex]);
+	//옵션 출력
+	Printscreen(43, 10, "- 게임 오버 -", gScreen[!gIndex]);
+	Printscreen(38, 12, "다시하기", gScreen[!gIndex]);
+	Printscreen(38, 14, "카드 구매 다시하기", gScreen[!gIndex]);
+	Printscreen(38, 16, "레벨 선택 화면으로 돌아가기", gScreen[!gIndex]);
+
+	Printscreen(34, currentSelectOption * 2 + 12, ">", gScreen[!gIndex]);
+	while (1) {
+		int key = 0;
+		if (_kbhit() != 0) {
+			key = _getch();
+			switch (key)
+			{
+			case 27:
+				currentSelectOption = 1;
+			case 32:
+				return currentSelectOption;
+			case 'w':
+				Printscreen(34, currentSelectOption * 2 + 10, "  ", gScreen[!gIndex]);
+				currentSelectOption = currentSelectOption > 1 ? currentSelectOption - 1 : 1;
+				Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
+				break;
+			case 's':
+				Printscreen(34, currentSelectOption * 2 + 10, "  ", gScreen[!gIndex]);
+				currentSelectOption = currentSelectOption < 3 ? currentSelectOption + 1 : 3;
+				Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+void LevelClear() { 
+	//텍스트 박스 출력 애니메이션
+	for (int i = 0; i < 11; i++) {
+		if (_kbhit()) break;
+		drawBox(24 - i * 1, 11, 5, 2 + i * 2, gScreen[!gIndex]);
+		drawBlank(25 - i * 1, 12, 3, i * 2, gScreen[!gIndex]);
+		Sleep(100);
+	}
+	drawBox(13, 11, 5, 24, gScreen[!gIndex]);
+	drawBlank(14, 12, 3, 22, gScreen[!gIndex]);
+	//클리어 텍스트 출력
+	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
+	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
+	Sleep(1000);
+
+	return;
+
+}
+
+#pragma endregion
+
+#pragma region InGameFunc
+void MovePlayer(int x, int y);
+//기본 블럭 이동
+void MoveBlock(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//움직일 블럭 위치
+	int blockNum = currentMap[y + moveY][x + moveX];
+	if (blockNum != 2 && blockNum != 4 && blockNum != 24) return;
+	//이동한 블럭의 도착점
+	int destinationNum = currentMap[y + 2 * moveY][x + 2 * moveX];
+
+	if (destinationNum != 0 && destinationNum != 3 && destinationNum != 5 && destinationNum != 6) return;
+
+	//도착점이 빈공간이면 이동
+	if (destinationNum == 0) {
+		currentMap[y + 2 * moveY][x + 2 * moveX] = blockNum;
+		currentMap[y + moveY][x + moveX] = 0;
+	}
+	// 도착점이 구멍일때 움직이는 블럭이 기본 블럭이면 서로 합체
+	else if (destinationNum == 3) {
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 0;
+	}
+	//도착점이 용광로일때 기본 블럭을 단단한 블록으로 업그레이드
+	else if (destinationNum == 5 && blockNum == 2) {
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 4;
+		blockNum = 4;
+	}
+	else if (destinationNum == 6 && blockNum == 4)
+	{
+		currentMap[y + moveY][x + moveX] = 0;
+		currentMap[y + 2 * moveY][x + 2 * moveX] = 4;
+	}
+
+	//기믹 체크
+	if (blockNum == 24) {
+		plugAndOutletOff(x + moveX, y + moveY, currentLevel, currentMap);
+		plugAndOutletOn(x + 2 * moveX, y + 2 * moveY, currentLevel, currentMap);
+	}
+	if (blockNum == 2) {
+		fanMove(x + 2 * moveX, y + 2 * moveY, currentMap);
+	}
+
+}
+void JumpPlayer() {
+	//direction으로 이동방향 계산
+	int moveX = direction % 2 == 0 ? 0 : direction > 2 ? -1 : 1;
+	int moveY = direction % 2 == 1 ? 0 : direction > 1 ? 1 : -1;
+	//건너뛸 블럭(테두리는 건너뛰지 못함)
+	int blockNum = currentMap[curY + moveY][curX + moveX];
+	if ((blockNum <= -1 && blockNum >= -6) || (blockNum <= -11 && blockNum>=-16)) return;
+	//플레이어의 착지 위치 착지 불가능 하면 반환
+	int destinationNum = currentMap[curY + 2 * moveY][curX + 2 * moveX];
+	if (destinationNum != 0 && destinationNum != 10) return;
+	//해당방향으로 이동 후 현재 위치 갱신
+	currentMap[curY][curX] = 0;
+	currentMap[curY + 2 * moveY][curX + 2 * moveX] = 1;
+	curX += 2 * moveX;
+	curY += 2 * moveY;
+	if (destinationNum == 10) isClear = 1; //착지지점이 도착지점일 경우 레벨클리어
+	return;
+}
+void MissileLaunch(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//해당 방향으로 한칸 앞에 있는 블럭 확인
+	int blockNum = currentMap[y + moveY][x + moveX];
+	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 파괴 후 재귀함수 종료
+	if (blockNum == 0 || blockNum == 3 || blockNum == 60) {
+		//아이콘을 그리고 지우는 함수 필요
+		MissileLaunch(x + moveX, y + moveY, d);
+	}
+	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum < 30)
+			 || blockNum == 61 || blockNum == 100) return; //도착지점과 테두리, 벽 블록은 부수지 못함
+	else { 
+		currentMap[y + moveY][x + moveX] = 0;
+	}
+	return;
+}
+void PullBlock(int x, int y, int d) {
+	//direction으로 이동방향 계산
+	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
+	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
+
+	//해당 방향으로 한칸 앞에 있는 블럭 확인
+	int blockNum = currentMap[y + moveY][x + moveX];
+	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 한칸 앞으로 당긴 후 재귀함수 종료
+	if (blockNum == 0 || blockNum == 3 || blockNum == 5) {
+		PullBlock(x + moveX, y + moveY, d);
+	}
+	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum <= 23) 
+			|| blockNum == 5 || blockNum == 6 || blockNum == 100) return;
+	else {
+		MoveBlock(x + 2 * moveX, y + 2 * moveY, d % 2 + (1 - d / 2) * 2);// 블럭을 반대방향에서 미는 함수
+	}
+	return;
+}
+void RunPlayer() {
+	int moveX = direction % 2 == 0 ? 0 : direction > 2 ? -1 : 1;
+	int moveY = direction % 2 == 1 ? 0 : direction > 1 ? 1 : -1;
+	int blockNum = currentMap[curY + moveY][curX + moveX];
+	//앞에 아무것도 없을 때만 이동
+	if (blockNum == 0) {
+		MovePlayer(moveX, moveY);
+		RunPlayer();
+	}
+	return;
+}
+
+//플레이어 이동
+void MovePlayer(int x, int y) {
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	int blockNum = currentMap[curY + y][curX + x];
+
+	switch (blockNum) {
+	case 10: //목적지
+		isClear = 1;
+	case 0: //빈칸
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
+		curY += y;
+		curX += x;
+		break;
+	case 6:
+		slimeSplit(curX, curY, currentMap);
+		break;
+	case 60:
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
+		isKey = 1;
+		curY += y;
+		curX += x;
+		break;
+	case 61:
+		unlockBox(curX + x,curY + y, currentMap);
+		break;
+	case 40:
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
+		isKey = 1;
+		curY += y;
+		curX += x;
+		switchOn(currentMap);
+		break;
+	case 42:
+		currentMap[curY][curX] = 0;
+		currentMap[curY + y][curX + x] = 1;
+		isKey = 1;
+		curY += y;
+		curX += x;
+		outlinePortalOn(currentMap);
+		break;
+	case -11: case -12: case -13: case -14: case -15: case -16: //연결테두리
+		//반대편 위치로 이동하는 함수
+		if (blockNum == -15) {
+			int blockNumPlusY = currentMap[1][curX + x];
+			int blockNumMinusY = currentMap[18][curX + x];
+			if (y > 0) {
+				if (blockNumPlusY == 0) {
+					currentMap[curY][curX] = 0;
+					currentMap[1][curX] = 1;
+					curY = 1;
+				}
+				else if (blockNumPlusY == 10) {
+					currentMap[curY][curX] = 0;
+					currentMap[2][curX] = 1;
+					curY = 1;
+					isClear = 1;
+				}
+			}
+			else if (y < 0) {
+				if (blockNumMinusY == 0) {
+					currentMap[curY][curX] = 0;
+					currentMap[18][curX] = 1;
+					curY = 18;
+				}
+				else if (blockNumMinusY == 10) {
+					currentMap[curY][curX] = 0;
+					currentMap[18][curX] = 1;
+					curY = 18;
+					isClear = 1;
+				}
+			}
+		}
+		else if (blockNum == -16) {
+			int blockNumPlusX = currentMap[curY + y][1];
+			int blockNumMinusX = currentMap[curY + y][28];
+			if (x > 0) {
+				if (blockNumPlusX == 0){
+					currentMap[curY][curX] = 0;
+					currentMap[curY][1] = 1;
+					curX = 1;
+				}
+				else if (blockNumPlusX == 10) {
+					currentMap[curY][curX] = 0;
+					currentMap[curY][1] = 1;
+					curX = 1;
+					isClear = 1;
+				}
+				
+			}
+			else if (x < 0) {
+				if (blockNumMinusX == 0) {
+					currentMap[curY][curX] = 0;
+					currentMap[curY][28] = 1;
+					curX = 28;
+				}
+				else if (blockNumMinusX == 10) {
+					currentMap[curY][curX] = 0;
+					currentMap[curY][28] = 1;
+					curX = 28;
+					isClear = 1;
+				}
+			}
+		}
+		break;
+	}
+	return;
+}
+
+
+
+
+
+#pragma endregion
+
+#pragma region inGameProcessInput
+int inGameProcessInputs(HANDLE hConsoleInput) {
+	INPUT_RECORD inputRecord;
+	DWORD events;
+
+	// 콘솔 입력 모드에서 마우스와 키보드 모두 입력받음
+	SetConsoleMode(hConsoleInput, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
+
+	while (1) {
+		ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
+
+		if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
+			// 키보드 입력
+			switch (inputRecord.Event.KeyEvent.wVirtualKeyCode) {
+			case '1': return '1';
+			case '2': return '2';
+			case '3': return '3';
+			case '4': return '4';
+			case '5': return '5';
+			case '6': return '6';
+			case 'W': case 'w': return 'w';
+			case 'A': case 'a': return 'a';
+			case 'S': case 's': return 's';
+			case 'D': case 'd': return 'd';
+			case 27: return 27;
+			}
+		}
+		else if (inputRecord.EventType == MOUSE_EVENT) {
+			// 마우스 입력
+			MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
+			if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
+				curMousePos.X = mouseEvent.dwMousePosition.X;
+				curMousePos.Y = mouseEvent.dwMousePosition.Y;
+				return 'M';	//더블클릭 발생시 M반환. 나머지는 main에서 처리.
+			}
+		}
+	}
+}
+
 //더블클릭했을 때 마우스 좌표를 반환하는 함수.
 //도움말 기능 포함.
+/*
 MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
 	INPUT_RECORD inputRecord;
 	DWORD events;
@@ -254,400 +927,9 @@ MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
 		}
 	}
 }
+*/
 
-void setPrepareOrigininfo() {
-	costInfo = stageInfo[currentLevel].cost;
-	for (int i = 0; i < 8; i++) {
-		deckInfo[i] = 0;
-	}
-}
-
-#pragma endregion
-//씬4 관련 함수
-#pragma region InGameSceneFunc
-
-char str_text[8][35] = { 0 }; // 텍스트 박스 출력 텍스트
-int tens, ones; // 턴 박스 출력 텍스쳐 번호 // 십의자리, 일의자리
-inGameDeckInfo inGameDeck[8];
-int currentMap[20][30];
-void deckOut();
-
-int curDeckCoord[8][2];
-
-void mapCopy() {
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 30; j++)
-			currentMap[i][j] = stageMap[currentLevel][i][j];
-	}
-}
-
-void levelBoxOut() {
-	COORD pos = { 62, 2 };
-	Printscreen(pos.X, pos.Y, stageInfo[currentLevel].stageName, gScreen[gIndex]);
-}
-
-// 인게임 화면 출력
-void drawInGame(HANDLE curBuf) {
-	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	int startX = 60;
-	int startY = 0;
-	COORD pos = { 0,0 };
-	drawMap(0, 0, curBuf);
-
-	//스테이지 레벨 창
-	drawBox(30, 0, 5, 12, curBuf);
-
-	// 남은 턴 수 창
-	drawBox(30, 5, 12, 20, curBuf);
-
-	//텍스트 박스 창
-	drawBox(30, 17, 10, 20, curBuf);
-
-	//덱 출력
-	deckOut();
-}
-
-void textInput(int n, char* text) {
-	strcpy_s(str_text[n], 35, text);
-}
-void turnCountInOut(int n, int p) {
-	tens = n;
-	ones = p;
-}
-//텍스트 출력 함수
-void textBoxOut(char text[][35]) {
-	COORD pos = { 0, 0 };
-	int startY = 18;
-	pos.X = 62;
-	for (int i = 0; i < 8; i++) {
-		if (text[i][0] == '\0') // 첫 번째 문자가 널 문자라면 종료
-			break;
-
-		pos.Y = startY + i;
-
-		Printscreen(pos.X, pos.Y, text[i], gScreen[gIndex]);
-	}
-}
-
-void turnCountDown() {
-	if (ones == 0 && tens > 0) {
-		tens--;
-		ones = 9;
-	}
-	else {
-		ones--;
-	}
-}
-
-void turnBoxOut(int num1, int num2) {
-	COORD pos = { 0, 0 };
-	char output[100];
-	int startY = 6;
-	int startX = 73;
-	for (int i = 0; i < 9; i++) {
-		pos.Y = startY + i;
-		for (int j = 0; j < 5; j++) {
-			pos.X = startX + j;
-			if (numberTexture[num1][i][j] == 1) {
-				strcpy_s(output, 3, "#");
-				Printscreen(pos.X, pos.Y, "#", gScreen[gIndex]);
-			}
-			else {
-				strcpy_s(output, 3, " ");
-				Printscreen(pos.X, pos.Y, " ", gScreen[gIndex]);
-			}
-		}
-	}
-	startX = 82;
-	for (int i = 0; i < 9; i++) {
-		pos.Y = startY + i;
-		for (int j = 0; j < 5; j++) {
-			pos.X = startX + j;
-			if (numberTexture[num2][i][j] == 1) {
-				strcpy_s(output, 3, "#");
-				Printscreen(pos.X, pos.Y, "#", gScreen[gIndex]);
-			}
-			else {
-				strcpy_s(output, 3, " ");
-				Printscreen(pos.X, pos.Y, " ", gScreen[gIndex]);
-			}
-		}
-	}
-}
-
-void deckSetting() {
-	int idx = 0;
-
-	for (int i = 0; i < 8; i++) {
-		if (deckInfo[i] != 0) {
-			if (i == 0) {
-				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "밀기");
-				inGameDeck[idx].cardType = 0;
-			}
-			else if (i == 1) {
-				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "점프");
-				inGameDeck[idx].cardType = 1;
-			}
-			else if (i == 2) {
-				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "로켓");
-				inGameDeck[idx].cardType = 2;
-			}
-			else if (i == 3) {
-				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "그랩");
-				inGameDeck[idx].cardType = 3;
-			}
-			idx++;
-		}
-	}
-}
-
-void resetDeckCoord() {
-	for (int i = 0; i < 8; i++) {
-		curDeckCoord[i][0] = -1;
-		curDeckCoord[i][1] = -1;
-	}
-}
-
-void setCurDeckCoord(int cardIdx, int X, int Y) {
-	curDeckCoord[cardIdx][0] = X;
-	curDeckCoord[cardIdx][1] = Y;
-}
-
-void deckOut() {
-	int startX = 60;
-	int startY = 0;
-	COORD pos = { 0,0 };
-
-	for (int i = 0; i < deckCount; i++) {
-		char cardStr[10];
-		sprintf(cardStr, "%d 개", inGameDeck[i].cardCount);  // 정수를 문자열로 변환
-		Printscreen(i * 8 + 2, 22, inGameDeck[i].cardName, gScreen[gIndex]);
-		Printscreen(i * 8 + 1, 23, "  ─", gScreen[gIndex]);
-		Printscreen(i * 8 + 2, 24, cardStr, gScreen[gIndex]); // pc에서 확인할 것
-		drawBox(i * 4, 21, 5, 4, gScreen[gIndex]);
-		setCurDeckCoord(i, i * 8, 21);
-	}
-}
-
-
-void MoveBlock(int x, int y, int d);
-void JumpPlayer();
-void MissileLaunch(int x, int y, int d);
-void PullBlock(int x, int y, int d);
-
-
-void useDeck(int X, int Y) {
-	for (int i = 0; i < deckCount; i++) {
-		if (X >= curDeckCoord[i][0] && X <= curDeckCoord[i][0] + 8
-			&& Y >= 21 && Y <= 26) {
-			if (inGameDeck[i].cardCount > 0) {
-				if (inGameDeck[i].cardType == 0) {
-					MoveBlock(curX, curY, direction);
-				}
-				else if (inGameDeck[i].cardType == 1) {
-					JumpPlayer();
-				}
-				else if (inGameDeck[i].cardType == 2) {
-					MissileLaunch(curX, curY, direction);
-				}
-				else if (inGameDeck[i].cardType == 3) {
-					PullBlock(curX, curY, direction);
-				}
-				inGameDeck[i].cardCount--;
-			}
-		}
-	}
-}
-
-void deckCountDown(int x, int y) {
-	for (int i = 0; i < deckCount; i++) {
-		if (y >= 21 && y <= 25 && x >= i * 8 + 1 && x < i * 8 + 8) {
-			if (inGameDeck[i].cardCount > 0)
-				inGameDeck[i].cardCount--;
-		}
-	}
-}
-
-void inGameDeckReset() {
-	for (int i = 0; i < 8; i++) {
-		deckInfo[i] = 0;
-		inGameDeck[i].cardCount = 0;
-		deckCount = 0;
-	}
-}
-
-//더블 버퍼를 이용해서 인게임 화면 그려주는 함수
-void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int numLevelBoxOut) {
-	screenClear();
-	if (numDrawInGame)
-		drawInGame(gScreen[gIndex]); // 임시버퍼에 인게임 화면 그리기
-	if (numTextBoxOut)
-		textBoxOut(str_text);
-	if (numTurnBoxOut)
-		turnBoxOut(tens, ones);
-	if (numLevelBoxOut)
-		levelBoxOut();
-	screenFlipping();
-}
-
-
-
-#pragma endregion
-
-
-#pragma region InGameFunc
-//기본 블럭 이동
-void MoveBlock(int x, int y, int d) {
-	//direction으로 이동방향 계산
-	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
-	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
-
-	//움직일 블럭 위치
-	int blockNum = currentMap[y + moveY][x + moveX];
-	if (blockNum != 2 && blockNum != 24) return;
-	//이동한 블럭의 도착점
-	int destinationNum = currentMap[y + 2 * moveY][x + 2 * moveX];
-
-	if (destinationNum != 0 && destinationNum != 3 && destinationNum != 5) return;
-
-	//도착점이 빈공간이면 이동
-	if (destinationNum == 0) {
-		currentMap[y + 2 * moveY][x + 2 * moveX] = blockNum;
-		currentMap[y + moveY][x + moveX] = 0;
-	}
-	// 도착점이 구멍일때 움직이는 블럭이 기본 블럭이면 서로 합체
-	else if (destinationNum == 3) {
-		currentMap[y + moveY][x + moveX] = 0;
-		currentMap[y + 2 * moveY][x + 2 * moveX] = 0;
-	}
-	//도착점이 용광로일때 기본 블럭을 단단한 블록으로 업그레이드
-	else if (destinationNum == 5) {
-		currentMap[y + moveY][x + moveX] = 0;
-		currentMap[y + 2 * moveY][x + 2 * moveX] = 4;
-	}
-
-
-	//기믹 체크
-	if (blockNum == 24) {
-		plugAndOutletOff(x + moveX, y + moveY, currentLevel, currentMap);
-		plugAndOutletOn(x + 2 * moveX, y + 2 * moveY, currentLevel, currentMap);
-	}
-	if (blockNum == 2) {
-		fanMove(x + 2 * moveX, y + 2 * moveY, currentLevel, currentMap);
-	}
-
-}
-void JumpPlayer() {
-	//direction으로 이동방향 계산
-	int moveX = direction % 2 == 0 ? 0 : direction > 2 ? -1 : 1;
-	int moveY = direction % 2 == 1 ? 0 : direction > 1 ? 1 : -1;
-	//건너뛸 블럭(테두리는 건너뛰지 못함)
-	int blockNum = currentMap[curY + moveY][curX + moveX];
-	if (blockNum <= -1 && blockNum >= -6) return;
-	//플레이어의 착지 위치 착지 불가능 하면 반환
-	int destinationNum = currentMap[curY + 2 * moveY][curX + 2 * moveX];
-	if (destinationNum != 0 && destinationNum != 10) return;
-	//해당방향으로 이동 후 현재 위치 갱신
-	currentMap[curY][curX] = 0;
-	currentMap[curY + 2 * moveY][curX + 2 * moveX] = 1;
-	curX += 2 * moveX;
-	curY += 2 * moveY;
-	if (destinationNum == 10) isClear = 1; //착지지점이 도착지점일 경우 레벨클리어
-	return;
-}
-void MissileLaunch(int x, int y, int d) {
-	//direction으로 이동방향 계산
-	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
-	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
-
-	//해당 방향으로 한칸 앞에 있는 블럭 확인
-	int blockNum = currentMap[y + moveY][x + moveX];
-	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 파괴 후 재귀함수 종료
-	if (blockNum == 0 || blockNum == 3) { 
-		//아이콘을 그리고 지우는 함수 필요
-		MissileLaunch(x + moveX, y + moveY, d);
-	}
-	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum < 30)) return; //도착지점과 테두리는 부수지 못함
-	else { 
-		currentMap[y + moveY][x + moveX] = 0;
-	}
-	return;
-}
-void PullBlock(int x, int y, int d) {
-	//direction으로 이동방향 계산
-	int moveX = d % 2 == 0 ? 0 : d > 2 ? -1 : 1;
-	int moveY = d % 2 == 1 ? 0 : d > 1 ? 1 : -1;
-
-	//해당 방향으로 한칸 앞에 있는 블럭 확인
-	int blockNum = currentMap[y + moveY][x + moveX];
-	// 해당 위치가 빈칸이면 재귀함수로 다음칸 확인, 블럭이 있으면 한칸 앞으로 당긴 후 재귀함수 종료
-	if (blockNum == 0 || blockNum == 3 || blockNum == 5) {
-		PullBlock(x + moveX, y + moveY, d);
-	}
-	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum <= 23)) return;
-	else {
-		MoveBlock(x + 2 * moveX, y + 2 * moveY, d % 2 + (1 - d / 2) * 2);// 블럭을 반대방향에서 미는 함수
-	}
-	return;
-}
-
-
-//플레이어 이동
-void MovePlayer(int x, int y) {
-	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	int blockNum = currentMap[curY + y][curX + x];
-
-
-	switch (blockNum) {
-	case 10: //목적지
-		isClear = 1;
-	case 0: //빈칸
-		currentMap[curY][curX] = 0;
-		currentMap[curY + y][curX + x] = 1;
-		curY += y;
-		curX += x;
-		break;
-	case -11: case -12: case -13: case -14: case -15: case -16: //연결테두리
-		//반대편 위치로 이동하는 함수
-		break;
-	case 30://행동횟수 늘리는 아이템 
-		//행동카드 갯수 늘리는 함수
-		break;
-	}
-
-	return;
-}
-
-void LevelClear() {
-	//텍스트 박스 출력 애니메이션
-	for (int i = 0; i < 11; i++) {
-		if (_kbhit()) break;
-		drawBox(24 - i * 1, 11, 5, 2 + i * 2, gScreen[!gIndex]);
-		drawBlank(25 - i * 1, 12, 3, i * 2, gScreen[!gIndex]);
-		Sleep(100);
-	}
-	drawBox(13, 11, 5, 24, gScreen[!gIndex]);
-	drawBlank(14, 12, 3, 22, gScreen[!gIndex]);
-	//클리어 텍스트 출력
-	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
-	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
-	Sleep(1000);
-
-	return;
-
-}
-
-
-
-#pragma endregion
-
-#pragma region inGameProcessInput
-int processInputs(HANDLE hConsoleInput) {
+int prepareProcessInputs(HANDLE hConsoleInput) {
 	INPUT_RECORD inputRecord;
 	DWORD events;
 
@@ -660,15 +942,22 @@ int processInputs(HANDLE hConsoleInput) {
 		if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
 			// 키보드 입력
 			switch (inputRecord.Event.KeyEvent.wVirtualKeyCode) {
-			case 'W': case 'w': return 'w';
-			case 'A': case 'a': return 'a';
-			case 'S': case 's': return 's';
-			case 'D': case 'd': return 'd';
+			case '1': return '1';
+			case '2': return '2';
+			case '3': return '3';
+			case '4': return '4';
+			case '5': return '5';
+			case '6': return '6';
 			}
 		}
 		else if (inputRecord.EventType == MOUSE_EVENT) {
 			// 마우스 입력
 			MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
+			if (mouseEvent.dwEventFlags == MOUSE_MOVED) {
+				curMousePos.X = mouseEvent.dwMousePosition.X;
+				curMousePos.Y = mouseEvent.dwMousePosition.Y;
+				drawTooltip(curMousePos.X, curMousePos.Y);
+			}
 			if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
 				curMousePos.X = mouseEvent.dwMousePosition.X;
 				curMousePos.Y = mouseEvent.dwMousePosition.Y;
@@ -693,139 +982,159 @@ int main() {
 	curCursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 
-	MousePosition mousePos;
-
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
 	displayMainMenu(); // 메인화면 표시
-	save(3);
 	_getch();
+	int currentOption = 3;
 	while (1) {
+		switch (currentOption) {
+		case 3:
+			system("cls");
 
-		system("cls");
+			//씬2
+			isSelecting = 0;
+			clearLv = load();
 
-		//씬2
-		isSelecting = 0;
-		clearLv = load();
+			mapCopy();// 맵 복사
 
-		mapCopy();// 맵 복사
+			drawMap(20, 0, hConsoleOut);
+			drawLevelNameScreen();
+			drawSelectPointer(1);
+			int tick = 0, blink = 0;
+			int k = 0;
+			while (1) {
+				int key = 0;
+				if (_kbhit() != 0) {
+					key = _getch();
+					k = keyInput(key);
+					if (k == -1) break;
 
-		drawMap(20, 0, hConsoleOut);
-		drawLevelNameScreen();
-		drawLevelSelectPointer(1);
-		int tick = 0, blink = 0;
-		int k = 0;
-		while (1) {
-			// 마우스 클릭 좌표 감지
+					mapCopy();
 
-			int key = 0;
-			if (_kbhit() != 0) {
-				key = _getch();
-				k = keyInput(key);
-				if (k == -1) break;
-
-				mapCopy();
-
-				drawMap(20, 0, hConsoleOut);
-			}
-			Sleep(10);
-			if (k == 1) {
-				if (tick % 50 == 0) {
-					blink = !blink;
-					tick = 0;
-					selectLevel(blink);
+					drawMap(20, 0, hConsoleOut);
 				}
-				tick++;
+				Sleep(10);
+				if (k == 1) {
+					if (tick % 50 == 0) {
+						blink = !blink;
+						tick = 0;
+						selectLevel(blink);
+					}
+					tick++;
+				}
+				else if (k == 0) {
+					tick = 0;
+					blink = 0;
+				}
+
 			}
-			else if (k == 0) {
-				tick = 0; 
-				blink = 0;
-			}
-
-		}
-
-		//씬 3
-		system("cls");
-		setPrepareOrigininfo();
-		drawPrepareBox();
-		drawMap(20, 1, hConsoleOut);
-		while (1) {
-			drawPrepareInfo();
-			// 더블클릭 위치 가져오기
-			mousePos = getMouseClickPosition(hConsoleInput);
-			if (mousePos.X != -1 && mousePos.Y != -1) {
-				detectPrepareFunc(mousePos.X, mousePos.Y);
-			}
-			if (mousePos.Y >= confirmCoord[1] && mousePos.Y <= confirmCoord[1] + 5 && mousePos.X >= confirmCoord[0] && mousePos.X <= confirmCoord[0] + 8) {
-				break;
-			}
-		}
-		//다시 키보드 입력으로 바꾸기
-		enableKeyboardInput(hConsoleInput);
-
-
-
-		//씬 4
-		isClear = 0;
-		screenInit();
-		screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
-		Sleep(100);
-		strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
-		strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
-		strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
-
-		deckSetting();// 상점에서 산 카드 정보를 인게임에 업데이트 하는 함수
-		turnCountInOut(stageInfo[currentLevel].maxActionCount / 10, stageInfo[currentLevel].maxActionCount % 10);
-
-
-		curX = stageInfo[currentLevel].spawnX;
-		curY = stageInfo[currentLevel].spawnY;
-		screenRender(1, 1, 1, 1);
-		
-		while (1) {
-			int eventCode = processInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
-			switch (eventCode) {
-			case 'w': // 위로 이동
-				direction = 0;
-				MovePlayer(0, -1);//해당 위치가 도착지점이면 1, 아니면 0;
-				break;
-			case 'd': // 오른쪽으로 이동
-				direction = 1;
-				MovePlayer(1, 0);
-				break;
-			case 's': // 아래로 이동
-				direction = 2;
-				MovePlayer(0, 1);
-				break;
-			case 'a': // 왼쪽으로 이동
-				direction = 3;
-				MovePlayer(-1, 0);
-				break;
-			case 'M': // 마우스 입력
-				useDeck(curMousePos.X, curMousePos.Y);
-				break;
+			
+			//씬 3
+			setPrepareOrigininfo();
+			deckCount = 0;
+			//카드 구매화면 재시작 위치
+		case 2:
+			system("cls");
+			drawPrepareBox();
+			drawMap(20, 1, hConsoleOut);
+			MousePosition mousePos;
+			int detect;
+			while (1) {
+				drawPrepareInfo();
+				// 더블클릭 위치 가져오기
+				int eventCode = prepareProcessInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
+				detectPrepareFunc(curMousePos.X, curMousePos.Y, eventCode);
+				if (eventCode == 'M' && curMousePos.Y >= confirmCoord[1] && 
+					curMousePos.Y <= confirmCoord[1] + 5 && 
+					curMousePos.X >= confirmCoord[0] && 
+					curMousePos.X <= confirmCoord[0] + 8) {
+					break;
+				}
 			}
 
-			if (eventCode != 'M') {
-				turnCountDown();
-			}
+
+			
+			//씬 4
+		case 1:
+			mapCopy();// 맵 복사
+			direction = 0;
+			isClear = 0;
+			screenInit();
+			screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
+			Sleep(100);
+			strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
+			strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
+			strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
+
+			deckSetting();// 상점에서 산 카드 정보를 인게임에 업데이트 하는 함수
+			turnCountInOut(stageInfo[currentLevel].maxActionCount);
+
+
+			curX = stageInfo[currentLevel].spawnX;
+			curY = stageInfo[currentLevel].spawnY;
 			screenRender(1, 1, 1, 1);
-			if (isClear)break;
+
+			while (1) {
+				int eventCode = inGameProcessInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
+				//키 입력이 1~6일 경우 카드 사용
+				if (eventCode >= '1' && eventCode <= '6') {
+					useDeck(eventCode);
+				}
+				switch (eventCode) {
+				case 27://ESC
+					currentOption = ShowPauseAndMenu();
+					if (currentOption > 0) goto Game;
+					continue;
+				case 'w': // 위로 이동
+					direction = 0;
+					MovePlayer(0, -1);//해당 위치가 도착지점이면 1, 아니면 0;
+					break;
+				case 'd': // 오른쪽으로 이동
+					direction = 1;
+					MovePlayer(1, 0);
+					break;
+				case 's': // 아래로 이동
+					direction = 2;
+					MovePlayer(0, 1);
+					break;
+				case 'a': // 왼쪽으로 이동
+					direction = 3;
+					MovePlayer(-1, 0);
+					break;
+				}
+
+				turnCountDown();
+				screenRender(1, 1, 1, 1);
+				if (isClear)break;
+				if (turnCountText == 0) {
+					currentOption = ShowRestartMenu();
+					goto Game;
+				}
+				
+			}
+			if (isClear) {
+				LevelClear();
+				inGameDeckReset();
+			}
+
+			_getch();
+		Game:
+			direction = 0;
+			screenRelease();
 		}
-
-		LevelClear();
-		inGameDeckReset();
-
-		
-		_getch();
-		direction = 0;
-		screenRelease();
-		
 	}
 	system("cls");
 
 	return 0;
 }
+
+
+
+
+
+
+
 
 #pragma region CMFunction
 

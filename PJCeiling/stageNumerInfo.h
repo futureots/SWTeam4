@@ -1,11 +1,72 @@
 #pragma once
 #include <Windows.h>
 #include "doubleBuffering.h"
+
 int direction = 0;
+
+enum ColorType {
+	BLACK = 0,  	//0
+	darkBlue = 1,	//1
+	DarkGreen = 2,	//2
+	darkSkyBlue = 3,//3
+	DarkRed = 4,  	//4
+	DarkPurple = 5,	//5
+	DarkYellow = 6,	//6
+	GRAY = 7,		//7
+	DarkGray = 8,	//8
+	BLUE = 9,		//9
+	GREEN = 10,		//10
+	SkyBlue = 11,	//11
+	RED = 12,		//12
+	PURPLE = 13,		//13
+	YELLOW = 14,		//14
+	WHITE = 15		//15
+} COLOR;
+
+void textColor(int color) {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
 void stageNumber(int x, int y, int num, HANDLE curBuf) {
 	char output[100];
 	switch (num)
 	{
+	case -11:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "┌");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case -12:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "┐");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case -13:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "└─");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case -14:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "┘");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case -15:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "──");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case -16:
+		//SetConsoleTextAttribute(gScreen[gIndex], 9);
+		textColor(darkBlue);
+		strcpy_s(output, 100, "│");
+		Printscreen(x, y, output, curBuf);
+		break;
 	case -1:
 		//SetConsoleTextAttribute(gScreen[gIndex], 9);
 		strcpy_s(output, 100, "┌─");
@@ -64,7 +125,7 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 6:
-		SetConsoleTextAttribute(curBuf, 11);
+		SetConsoleTextAttribute(curBuf, 2);
 		strcpy_s(output, 100, "∂");
 		Printscreen(x, y, output, curBuf);
 		break;
@@ -84,7 +145,6 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 22:
-		
 	case 27:
 		strcpy_s(output, 100, "∩");
 		Printscreen(x, y, output, curBuf);
@@ -98,12 +158,34 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		strcpy_s(output, 100, "※");
 		Printscreen(x, y, output, curBuf);
 		break;
+	case 30:
+		SetConsoleTextAttribute(curBuf, 11);
+		strcpy_s(output, 100, "↑");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 31:
+		SetConsoleTextAttribute(curBuf, 11);
+		strcpy_s(output, 100, "→");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 32:
+		SetConsoleTextAttribute(curBuf, 11);
+		strcpy_s(output, 100, "↓");
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 33:
+		SetConsoleTextAttribute(curBuf, 11);
+		strcpy_s(output, 100, "←");
+		Printscreen(x, y, output, curBuf);
+		break;
 	case 60:
-		strcpy_s(output, 100, "①");
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "§");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 61:
-		strcpy_s(output, 100, "②");
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "▥");
 		Printscreen(x, y, output, curBuf);
 		break;
 	case 100:
@@ -111,19 +193,19 @@ void stageNumber(int x, int y, int num, HANDLE curBuf) {
 		strcpy_s(output, 100, "▩ ");	//부술 수 없는 블록
 		Printscreen(x, y, output, curBuf);
 		break;
-	case 101:
-		SetConsoleTextAttribute(curBuf, 14);
-		strcpy_s(output, 100, "◆");	//열쇠
-		Printscreen(x, y, output, curBuf);
-		break;
-	case 102:
+	case 40:
 		SetConsoleTextAttribute(curBuf, 14);
 		strcpy_s(output, 100, "◇");	//자물쇠블록.
 		Printscreen(x, y, output, curBuf);
 		break;
-	case 103:
+	case 41:
 		SetConsoleTextAttribute(curBuf, 14);
-		strcpy_s(output, 100, "▣ ");	//맵 연결 아이템.
+		strcpy_s(output, 100, "◆");	//열쇠
+		Printscreen(x, y, output, curBuf);
+		break;
+	case 42:
+		SetConsoleTextAttribute(curBuf, 14);
+		strcpy_s(output, 100, "▣");	//맵 연결 아이템.
 		Printscreen(x, y, output, curBuf);
 		break;
 	default:
