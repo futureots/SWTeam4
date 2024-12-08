@@ -9,33 +9,23 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+//마우스 좌표를 저장할 구조체
+typedef struct {
+	int X;
+	int Y;
+} MousePosition;
 
-
-/*
-/////////////////////////////////////추가 내용/////////////////////////////////////////
-
-textInput(int n, char*text) 텍스트 입력 함수
-텍스트 출력할 줄 n
-입력할 텍스트 text
-
-turnCountInput(int n, int p) 턴 카운트 입력 함수
-십의 자리 수 n
-일의 자리 수 p
-
-turnCountDown() 턴 카운트 감소 함수
-
-deckOut() 카드 내용 인게임 화면에 보여주는 함수
-
-deckCountDown() 카드 사용시 카운트 감소해주는 함수 (미구현)
-*/
 
 void drawMap(int startX, int startY, HANDLE curBuf);
-void drawBox(int startX, int startY, int height, int width);
+void drawBox(int startX, int startY, int height, int width, HANDLE curBuf);
+void drawBlank(int startX, int startY, int height, int width, HANDLE curBuf);
 void save(int k);
 int load();
 
 int currentLevel = 0;
 int curX, curY;
+int direction = 0;
+MousePosition curMousePos;
 
 //씬1 관련 함수
 #pragma region MainSceneFunc
@@ -46,17 +36,7 @@ void setCursorPosition(int x, int y) {
 	COORD pos = { x * 2,y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
-/*커서 숨김 함수
-void eraseCursor() {
-	CONSOLE_SCREEN_BUFFER_INFO conScreenInfo;
-	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleScreenBufferInfo(hConsoleOut, &conScreenInfo);
-	CONSOLE_CURSOR_INFO curCursorInfo;
-	GetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
-	curCursorInfo.bVisible = 0;
-	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
-}
-*/
+
 
 // 화면 테두리 그리는 함수 (양쪽에서 중앙으로 이동하며 그리기)
 void drawBorder() {
@@ -132,7 +112,7 @@ void displayMainMenu() {
 
 #pragma endregion
 //씬2 관련 함수
-#pragma region LevelSelectScreenFunction
+#pragma region LevelSelectSceneFunction
 int clearLv = 0;
 int isSelecting = 0;
 //레벨 이름 쓰기
@@ -192,7 +172,8 @@ int keyInput(int key) {
 	case 115:
 		if (isSelecting == 0) {
 			drawLevelSelectPointer(0);
-			currentLevel = currentLevel < clearLv ? currentLevel + 1 : clearLv;
+			int accessMax = clearLv >= stageLength - 1 ? stageLength - 1 : clearLv;
+			currentLevel = currentLevel < accessMax ? currentLevel + 1 : accessMax;
 			drawLevelSelectPointer(1);
 		}
 		break;
@@ -217,13 +198,12 @@ int keyInput(int key) {
 
 #pragma endregion
 //씬3 관련 함수
-#pragma region LevelSelectScreenFunction
+#pragma region CardSelectSceneFunction
 
-//마우스 좌표를 저장할 구조체
-typedef struct {
-	int X;
-	int Y;
-} MousePosition;
+void enableKeyboardInput(HANDLE hConsoleInput) {
+	// 콘솔 입력 모드를 키보드 입력으로.
+	SetConsoleMode(hConsoleInput, ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT);
+}
 
 //더블클릭했을 때 마우스 좌표를 반환하는 함수.
 //도움말 기능 포함.
@@ -234,7 +214,6 @@ MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
 
 	// 콘솔 입력 모드에서 마우스 입력을 활성화.
 	SetConsoleMode(hConsoleInput, ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
-
 	while (1) {
 		ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
 
@@ -254,23 +233,16 @@ MousePosition getMouseClickPosition(HANDLE hConsoleInput) {
 	}
 }
 
-void enableKeyboardInput(HANDLE hConsoleInput) {
-	// 콘솔 입력 모드를 키보드 입력으로.
-	SetConsoleMode(hConsoleInput, ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT);
-}
-
 void setPrepareOrigininfo() {
 	costInfo = stageInfo[currentLevel].cost;
 	for (int i = 0; i < 8; i++) {
-		//카드 인포는 아직 정해지지 않았으므로 일단 2로 초기화함.
-		cardInfo[i] = 2;
 		deckInfo[i] = 0;
 	}
 }
 
 #pragma endregion
 //씬4 관련 함수
-#pragma region InGameScene
+#pragma region InGameSceneFunc
 
 char str_text[8][35] = { 0 }; // 텍스트 박스 출력 텍스트
 int tens, ones; // 턴 박스 출력 텍스쳐 번호 // 십의자리, 일의자리
@@ -292,24 +264,20 @@ void drawInGame(HANDLE curBuf) {
 	drawMap(0, 0, curBuf);
 
 	//스테이지 레벨 창
-	drawBox(30, 0, 5, 12);
+	drawBox(30, 0, 5, 12, curBuf);
 
 	// 남은 턴 수 창
-	drawBox(30, 5, 12, 20);
+	drawBox(30, 5, 12, 20,curBuf);
 
 	//텍스트 박스 창
-	drawBox(30, 17, 10, 20);
+	drawBox(30, 17, 10, 20,curBuf);
 	// i 값이 카드 수
-
 	deckOut();
 }
-
-//텍스트 삽입 함수
 void textInput(int n, char* text) {
 	strcpy_s(str_text[n], 35, text);
 }
-//턴카운트 삽입 함수
-void trunCountInut(int n, int p) {
+void turnCountInOut(int n, int p) {
 	tens = n;
 	ones = p;
 }
@@ -328,7 +296,6 @@ void textBoxOut(char text[][35]) {
 	}
 }
 
-//턴 카운트 감소 함수
 void turnCountDown() {
 	if (ones == 0 && tens > 0) {
 		tens--;
@@ -411,22 +378,9 @@ void deckOut() {
 		}
 	}
 	for (int i = 0; i < deckCount; i++) {
-		drawBox(i * 4, 21, 5, 4);
+		drawBox(i * 4, 21, 5, 4,gScreen[gIndex]);
 	}
 }
-
-/*
-void deckCountDown(int x, int y) {
-
-	for (int i = 0; i < deckCount; i++) {
-		if (y >= 21 && y < 26) {
-			if (x >= i * 8 && x < i * 8 + 4) {
-				inGameCardInfo[i]--;
-			}
-		}
-	}
-}
-*/
 //더블 버퍼를 이용해서 인게임 화면 그려주는 함수
 void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int numLevelBoxOut) {
 	screenClear();
@@ -446,6 +400,112 @@ void screenRender(int numDrawInGame, int numTextBoxOut, int numTurnBoxOut, int n
 #pragma endregion
 
 
+#pragma region InGameFunc
+void InitPlayer() {
+	for (int i = 0; i < stageHeight; i++) {
+		for (int j = 0; j < stageWidth; j++) {
+			if (stageMap[currentLevel][i][j] == 1) {
+				curX = j;
+				curY = i;
+				break;
+			}
+		}
+	}
+}
+//플레이어 이동
+int MovePlayer(int x, int y) {
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	int blockNum = stageMap[currentLevel][curY + y][curX + x];
+
+	int result = 0;
+
+	switch (blockNum) {
+	case 10: //목적지
+		result = 1;
+	case 0: //빈칸
+		stageMap[currentLevel][curY][curX] = 0;
+		stageMap[currentLevel][curY + y][curX + x] = 1;
+		curY += y;
+		curX += x;
+		break;
+	case -11: case -12: case -13: case -14: case -15: case -16: //연결테두리
+		//반대편 위치로 이동하는 함수
+		break;
+
+	case 30://행동횟수 늘리는 아이템 
+		//행동카드 갯수 늘리는 함수
+		break;
+
+	case 3: // 구멍
+		//함수
+		break;
+
+	case -1: case -2: case -3: case -4: case -5: case -6: //fix테두리
+		//함수
+		break;
+
+	case 20: case 21: case 22: case 23: case 24: // 배터리 플러그 블록
+		//함수
+		break;
+
+	default:
+		break;
+
+	}
+	return result;
+}
+
+void LevelClear() {
+	for (int i = 0; i < 12; i++) {
+		if (_kbhit()) break;
+		drawBox(24 - i * 1, 11, 5, 2 + i * 2, gScreen[!gIndex]);
+		drawBlank(25 - i * 1, 12, 3, i * 2, gScreen[!gIndex]);
+		Sleep(100);
+	}
+	drawBox(13, 11, 5, 24, gScreen[!gIndex]);
+	drawBlank(14, 12, 3, 22, gScreen[!gIndex]);
+	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
+	if (load() <= currentLevel) save(currentLevel + 1);
+	Sleep(1000);
+
+	return;
+
+}
+
+#pragma endregion
+#pragma region inGameProcessInput
+int processInputs(HANDLE hConsoleInput) {
+    INPUT_RECORD inputRecord;
+    DWORD events;
+    
+    // 콘솔 입력 모드에서 마우스와 키보드 모두 입력받음
+    SetConsoleMode(hConsoleInput, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
+    
+    while (1) {
+        ReadConsoleInput(hConsoleInput, &inputRecord, 1, &events);
+
+        if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
+            // 키보드 입력
+            switch (inputRecord.Event.KeyEvent.wVirtualKeyCode) {
+                case 'W': case 'w': return 'w';
+                case 'A': case 'a': return 'a';
+                case 'S': case 's': return 's';
+                case 'D': case 'd': return 'd';
+            }
+        } else if (inputRecord.EventType == MOUSE_EVENT) {
+            // 마우스 입력
+            MOUSE_EVENT_RECORD mouseEvent = inputRecord.Event.MouseEvent;
+            if (mouseEvent.dwEventFlags == DOUBLE_CLICK) {
+                curMousePos.X = mouseEvent.dwMousePosition.X;
+                curMousePos.Y = mouseEvent.dwMousePosition.Y;
+                return 'M';	//더블클릭 발생시 M반환. 나머지는 main에서 처리.
+            }
+        }
+    }
+}
+#pragma endregion
+
 
 int main() {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -460,7 +520,6 @@ int main() {
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 
 	MousePosition mousePos;
-
 
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
@@ -498,6 +557,10 @@ int main() {
 				}
 				tick++;
 			}
+			else if (k == 0) {
+				tick = 0; 
+				blink = 0;
+			}
 
 		}
 
@@ -522,34 +585,59 @@ int main() {
 
 
 		//씬 4
+		int currentMap[20][30] = { 0, }; // 레벨 클리어 후 맵이 초기화 되야함
+
 		screenInit();
 		screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
-		Sleep(1000);
+		Sleep(100);
+		strcpy_s(str_text[0], 35, "눈을 뜨니 낯선천장이 보입니다.");
+		strcpy_s(str_text[1], 35, "일단 여기서 나가야할 것 같습니다.");
+		strcpy_s(str_text[2], 35, "'★'이 있는 곳까지 이동해봅시다.");
 
-		textInput(0, "눈을 뜨니 낯선천장이 보입니다.");
-		textInput(1, "일단 여기서 나가야할 것 같습니다.");
-		textInput(2, "'★'이 있는 곳까지 이동해봅시다.");
 
-		trunCountInut(2, 0);
+		turnCountInOut(3, 0);
+		InitPlayer();
 		screenRender(1, 1, 1, 1);
-		Sleep(1000);
-		
-		
-		for (int i = 0; i < 20; i++) {
-			turnCountDown();
+		while (1) {
+			int eventCode = processInputs(hConsoleInput);	//키보드, 마우스 이벤트 처리.
+			int clear = 0;
+
+			switch (eventCode) {
+			case 'w':
+				clear = MovePlayer(0, -1);
+				direction = 0;
+				break;
+			case 's':
+				clear = MovePlayer(0, 1);
+				direction = 1;
+				break;
+			case 'a':
+				clear = MovePlayer(-1, 0);
+				direction = 2;
+				break;
+			case 'd':
+				clear = MovePlayer(1, 0);
+				direction = 3;
+				break;
+			case 'M':  // 마우스 더블클릭 이벤트 코드
+				//더블클릭 먹히는지 테스트용.
+				//return;
+				break;
+			}
+
+			if (clear)break;
+			if (eventCode != 'M') {
+				turnCountDown();
+			}
 			screenRender(1, 1, 1, 1);
-			Sleep(1000);
 		}
-		
-		/*
-		// 활성화된 버퍼에서 마우스 좌표 받기
-		mousePos = getMouseClickPosition(gScreen[!gIndex]);
-		if (mousePos.X != -1 && mousePos.Y != -1) {
-			deckCountDown(mousePos.X, mousePos.Y);
-			screenRender(1, 1, 1, 1);
-		}
-		enableKeyboardInput(gScreen[!gIndex]);
-		*/
+
+		tens = 4, ones = 8; // 턴 상태창 숫자 설정
+		//Sleep(1000);
+		screenRender(1, 1, 1, 1);
+		LevelClear();
+
+
 		_getch();
 
 		screenRelease();
@@ -575,30 +663,39 @@ void drawMap(int startX, int startY, HANDLE curBuf) {
 		}
 	}
 }
-void drawBox(int startX, int startY, int height, int width) {
+void drawBox(int startX, int startY, int height, int width, HANDLE curBuf) {
 	COORD pos = { 0,0 };
 	pos.Y = startY;
 	for (int i = 0; i < width; i++) { //top line
 		pos.X = (startX + i) * 2;
-		if (i == 0) stageNumber(pos.X, pos.Y, -1, gScreen[gIndex]);
-		else if (i == width - 1)stageNumber(pos.X, pos.Y, -2, gScreen[gIndex]);
-		else stageNumber(pos.X, pos.Y, -5, gScreen[gIndex]);
+		if (i == 0) stageNumber(pos.X, pos.Y, -1, curBuf);
+		else if (i == width - 1)stageNumber(pos.X, pos.Y, -2, curBuf);
+		else stageNumber(pos.X, pos.Y, -5, curBuf);
 	}
 	for (int i = 1; i < height - 1; i++) { // middle side line
 		pos.Y = startY + i;
 		pos.X = startX * 2;
-		stageNumber(pos.X, pos.Y, -6, gScreen[gIndex]);
+		stageNumber(pos.X, pos.Y, -6, curBuf);
 		pos.X = (startX + width - 1) * 2;
-		stageNumber(pos.X, pos.Y, -6, gScreen[gIndex]);
+		stageNumber(pos.X, pos.Y, -6, curBuf);
 	}
 	pos.Y = startY + height - 1;
 	for (int i = 0; i < width; i++) { //bottom line
 		pos.X = (startX + i) * 2;
-		if (i == 0) stageNumber(pos.X, pos.Y, -3, gScreen[gIndex]);
-		else if (i == width - 1) stageNumber(pos.X, pos.Y, -4, gScreen[gIndex]);
-		else stageNumber(pos.X, pos.Y, -5, gScreen[gIndex]);
+		if (i == 0) stageNumber(pos.X, pos.Y, -3, curBuf);
+		else if (i == width - 1) stageNumber(pos.X, pos.Y, -4, curBuf);
+		else stageNumber(pos.X, pos.Y, -5, curBuf);
 	}
-
+}
+void drawBlank(int startX, int startY, int height, int width, HANDLE curBuf) {
+	COORD pos = { 0,0 };
+	for (int i = 0; i < height; i++) {
+		pos.Y = startY + i;
+		for (int j = 0; j < width; j++) {
+			pos.X = (startX + j) * 2;
+			stageNumber(pos.X, pos.Y, 0, curBuf);
+		}
+	}
 }
 void save(int k) {
 	FILE* fp;
@@ -622,44 +719,7 @@ int load() {
 #pragma endregion
 
 
-#pragma region InGameFunction
 
-/*void MovePlayer(int x, int y) {
-	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	int** stage = stageMap[currentLevel];
-	if (stage[curY + y][curX + x] != 0) {
-		MoveBlock(curX + x, curY + y, x, y);
-		return;
-	}
-	stage[curY][curX] = 0;
-	stage[curY + y][curX + x] = 1;
-	curY += y;
-	curX += x;
-
-
-	return;
-}
-void MoveBlock(int blockX, int blockY, int x, int y) {
-	int blockNum = stageMap[blockY][blockX];
-	switch (blockNum)
-	{
-	case 2:
-		MoveNormalBlock(blockX, blockY, x, y);
-		break;
-	default:
-		break;
-	}
-
-
-}
-void MoveNormalBlock(int blockX, int blockY, int x, int y) {
-	if (stageMap[blockY + y][blockX + x] != 0) return;
-	stageMap[blockY + y][blockX + x] = stageMap[blockY][blockX];
-	stageMap[blockY][blockX] = 0;
-	return;
-}*/
-
-#pragma endregion
 
 
 

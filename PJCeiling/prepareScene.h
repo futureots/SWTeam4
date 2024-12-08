@@ -11,6 +11,7 @@ int cardInfo[8];
 
 //코스트를 저장하는 int값. 맵으로부터 읽어들인 총 코스트에 따라 변경.
 int costInfo;
+int costPrice[8] = { 1, 2, 5, 0, 0, 0, 0, 0 };
 
 //덱의 카드 수를 저장하는 배열.
 int deckInfo[8];
@@ -60,7 +61,19 @@ int prepareMap[27][50] = {
 
 void drawCardInfo();
 void drawDeckInfo();
-void drawCostInfo();;
+void drawcostInfo();
+COORD getCurrentCursorPos();
+void setCurrentCursorPos(int posX, int posY);
+void drawPrepareBox();
+void printScoreOver(int index);
+void printDeckCountOver();
+void detectPrepareFunc(int X, int Y);
+void drawPrepareInfo();
+void drawCardInfo();
+void drawDeckInfo();
+void drawcostInfo();
+void eraseTooltipBox();
+void drawTooltip(int X, int Y);
 
 
 
@@ -115,32 +128,61 @@ void drawPrepareBox() {
 	}
 }
 
+void printScoreOver(int Index) {
+	eraseTooltipBox();
+	printf("코스트가 부족합니다!");
+	setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+	printf("필요한 코스트: %d", costPrice[Index]);
+	setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 4);
+	printf("남은 코스트: %d", costInfo);
+	Sleep(1000);
+	eraseTooltipBox();
+}
+
+void printDeckCountOver() {
+	eraseTooltipBox();
+	printf("남은 매수가 없습니다!");
+	Sleep(1000);
+	eraseTooltipBox();
+}
+
 void detectPrepareFunc(int X, int Y) {
 
 	//카드 구매
 	if (Y >= cardCoord[0][1] && Y <= cardCoord[0][1] + 5) {
 		//첫번째 카드(밀기)
 		if (X >= cardCoord[0][0] && X <= cardCoord[0][0] + 8) {
-			if (cardInfo[0] > 0 && costInfo >= 1) {	//코스트는 1
+			if (costInfo >= costPrice[0]) {	//코스트는 1
 				cardInfo[0]--;
 				deckInfo[0]++;
 				costInfo--;
 			}
+			else {
+				printScoreOver(costPrice[0]);
+			}
 		}
+		
 		//두번째 카드(점프)
 		if (X >= cardCoord[1][0] && X <= cardCoord[1][0] + 8) {
-			if (cardInfo[1] > 0 && costInfo >= 2) {	//코스트는 2
+			if (costInfo >= costPrice[1]) {	//코스트는 2
 				cardInfo[1]--;
 				deckInfo[1]++;
 				costInfo = costInfo - 2;
 			}
+			else {
+				printScoreOver(costPrice[1]);
+			}
 		}
+		
 		//세번째 카드(로켓)
 		if (X >= cardCoord[2][0] && X <= cardCoord[2][0] + 8) {
-			if (cardInfo[2] > 0 && costInfo >= 5) {	//코스트는 3
+			if (costInfo >= costPrice[2]) {	//코스트는 3
 				cardInfo[2]--;
 				deckInfo[2]++;
 				costInfo = costInfo - 5;
+			}
+			else {
+				printScoreOver(costPrice[2]);
 			}
 		}
 	}
@@ -154,6 +196,9 @@ void detectPrepareFunc(int X, int Y) {
 				deckInfo[0]--;
 				costInfo++;
 			}
+			else {
+				printDeckCountOver();
+			}
 		}
 		//두번째 카드(점프)
 		if (X >= deckCoord[1][0] && X < deckCoord[1][0] + 6) {
@@ -161,6 +206,9 @@ void detectPrepareFunc(int X, int Y) {
 				cardInfo[1]++;
 				deckInfo[1]--;
 				costInfo = costInfo  + 2;
+			}
+			else {
+				printDeckCountOver();
 			}
 		}
 		//세번째 카드(로켓)
@@ -170,6 +218,9 @@ void detectPrepareFunc(int X, int Y) {
 				deckInfo[2]--;
 				costInfo = costInfo + 5;
 			}
+			else {
+				printDeckCountOver();
+			}
 		}
 	}
 
@@ -178,7 +229,7 @@ void detectPrepareFunc(int X, int Y) {
 void drawPrepareInfo() {
 	drawCardInfo();
 	drawDeckInfo();
-	drawCostInfo();
+	drawcostInfo();
 	setCurrentCursorPos(confirmCoord[0] + 2, confirmCoord[1] + 2);
 	printf("확인");
 }
@@ -195,13 +246,6 @@ void drawCardInfo() {
 
 	setCurrentCursorPos(cardInfoCoord[3][0], cardInfoCoord[3][1]);
 	printf("etc");
-
-	for (int i = 0; i < 4; i++) {
-		setCurrentCursorPos(cardInfoCoord[i][0], cardInfoCoord[i][1] + 1);
-		printf(" ─");
-		setCurrentCursorPos(cardInfoCoord[i][0], cardInfoCoord[i][1] + 2);
-		printf("%d 개", cardInfo[i]);
-	}
 }
 
 void drawDeckInfo() {
@@ -222,7 +266,7 @@ void drawDeckInfo() {
 	}
 }
 
-void drawCostInfo() {
+void drawcostInfo() {
 	setCurrentCursorPos(costInfoCoord[0], costInfoCoord[1]);
 	printf("Cost");
 	setCurrentCursorPos(costInfoCoord[0], costInfoCoord[1] + 1);
@@ -233,7 +277,7 @@ void drawCostInfo() {
 
 void eraseTooltipBox() {
 	setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1]);
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 6; i++) {
 		printf("                                ");
 		setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + i);
 	}
@@ -247,16 +291,31 @@ void drawTooltip(int X, int Y) {
 		if (X >= cardCoord[0][0] && X <= cardCoord[0][0] + 8) {
 			eraseTooltipBox();
 			printf("블럭을 밉니다.");
+			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+			printf("가격은 %d코스트 입니다.", costPrice[0]);
 		}
 		//두번째 카드(점프)
 		if (X >= cardCoord[1][0] && X <= cardCoord[1][0] + 8) {
 			eraseTooltipBox();
 			printf("블럭을 건너뜁니다.");
+			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+			printf("가격은 %d코스트 입니다.", costPrice[1]);
 		}
 		//세번째 카드(로켓)
 		if (X >= cardCoord[2][0] && X <= cardCoord[2][0] + 8) {
 			eraseTooltipBox();
 			printf("로켓을 발사합니다.");
+			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+			printf("가격은 %d코스트 입니다.", costPrice[2]);
+		}
+	}
+	//덱 정보 툴팁
+	if (Y >= deckCoord[0][1] && Y <= deckCoord[0][1] + 5) {
+		if (X >= deckCoord[0][0] && X <= deckCoord[7][0] + 8) {
+			eraseTooltipBox();
+			printf("당신이 구매한 덱입니다.");
+			setCurrentCursorPos(textBoxCoord[0], textBoxCoord[1] + 2);
+			printf("더블클릭으로 환불할 수 있습니다.");
 		}
 	}
 	//버튼 정보 툴팁
