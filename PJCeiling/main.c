@@ -20,8 +20,9 @@ typedef struct {
 void drawMap(int startX, int startY, HANDLE curBuf);
 void drawBox(int startX, int startY, int height, int width, HANDLE curBuf);
 void drawBlank(int startX, int startY, int height, int width, HANDLE curBuf);
-void save(int k);
-int load();
+void save();
+void load();
+void reset();
 void HelpPopUp();
 
 int currentLevel = 0;
@@ -29,6 +30,7 @@ int curX, curY;
 MousePosition curMousePos;
 int isClear = 0;
 int hintVisible;//기본값 3, 힌트 5까지
+int saveData[19] = { 2,1,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
@@ -131,10 +133,12 @@ void drawLevelNameScreen(int start) {
 		SetConsoleCursorPosition(hConsoleOut, pos);
 		printf("                              ");
 		if (i + start >= stageLength) break;
+		if (saveData[i + start] > 0) clearLv = i + start + 1;
 		SetConsoleCursorPosition(hConsoleOut, pos);
 		if (clearLv >= i+start) {
 			printf("%s", stageInfo[i+start].stageName);
-			if (clearLv > i+start) printf("★");
+			if (saveData[i+start]== 2) printf("★");
+			else if(saveData[i+start] == 1)printf("☆");
 		}
 		else printf("???");
 	}
@@ -610,21 +614,22 @@ int ShowPauseAndMenu() {
 	}
 }
 int ShowRestartMenu() {
-	int currentSelectOption = 3;
+	int currentSelectOption = 4;
 
 	for (int i = 0; i < 11; i++) {
 		if (_kbhit()) break;
-		drawBox(24 - i * 1, 8, 11, 2 + i * 2, gScreen[!gIndex]);
-		drawBlank(25 - i * 1, 9, 9, i * 2, gScreen[!gIndex]);
+		drawBox(24 - i * 1, 8, 13, 2 + i * 2, gScreen[!gIndex]);
+		drawBlank(25 - i * 1, 9, 11, i * 2, gScreen[!gIndex]);
 		Sleep(100);
 	}
-	drawBox(13, 8, 11, 24, gScreen[!gIndex]);
-	drawBlank(14, 9, 9, 22, gScreen[!gIndex]);
+	drawBox(13, 8, 13, 24, gScreen[!gIndex]);
+	drawBlank(14, 9, 11, 22, gScreen[!gIndex]);
 	//옵션 출력
 	Printscreen(43, 10, "- 게임 오버 -", gScreen[!gIndex]);
-	Printscreen(38, 12, "다시하기", gScreen[!gIndex]);
-	Printscreen(38, 14, "카드 구매 다시하기", gScreen[!gIndex]);
-	Printscreen(38, 16, "레벨 선택 화면으로 돌아가기", gScreen[!gIndex]);
+	Printscreen(38, 12, "계속하기", gScreen[!gIndex]);
+	Printscreen(38, 14, "다시하기", gScreen[!gIndex]);
+	Printscreen(38, 16, "카드 구매 다시하기", gScreen[!gIndex]);
+	Printscreen(38, 18, "레벨 선택 화면으로 돌아가기", gScreen[!gIndex]);
 
 	Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
 	while (1) {
@@ -644,7 +649,7 @@ int ShowRestartMenu() {
 				break;
 			case 's':
 				Printscreen(34, currentSelectOption * 2 + 10, "  ", gScreen[!gIndex]);
-				currentSelectOption = currentSelectOption < 3 ? currentSelectOption + 1 : 3;
+				currentSelectOption = currentSelectOption < 4 ? currentSelectOption + 1 : 4;
 				Printscreen(34, currentSelectOption * 2 + 10, ">", gScreen[!gIndex]);
 				break;
 			default:
@@ -653,7 +658,7 @@ int ShowRestartMenu() {
 		}
 	}
 }
-void LevelClear() { 
+void LevelClear(int grade) { 
 	//텍스트 박스 출력 애니메이션
 	for (int i = 0; i < 11; i++) {
 		if (_kbhit()) break;
@@ -665,7 +670,8 @@ void LevelClear() {
 	drawBlank(14, 12, 3, 22, gScreen[!gIndex]);
 	//클리어 텍스트 출력
 	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
-	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
+	if (saveData[currentLevel] < grade) saveData[currentLevel] = grade;
+	save();
 	Sleep(1000);
 
 	return;
@@ -724,7 +730,7 @@ void EndingScreen() {
 	for (int i = 0; i < SCREEN_HEIGHT; i++) {
 		pos.Y = i;
 		SetConsoleCursorPosition(hConsoleOut, pos);
-		printf("%s",endingImage[i]);
+		printf("%s",endingImage2[i]);
 		for (int i = 0; i < 30; i++) {
 			Sleep(10);
 			if (_kbhit() != 0) {
@@ -1014,12 +1020,11 @@ int main() {
 
 	CONSOLE_SCREEN_BUFFER_INFO conScreenInfo;
 	GetConsoleScreenBufferInfo(hConsoleOut, &conScreenInfo);
-
+	save();
 	CONSOLE_CURSOR_INFO curCursorInfo;
 	GetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 	curCursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
-	save(18);
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
 	displayMainMenu(); // 메인화면 표시
@@ -1033,7 +1038,8 @@ int main() {
 
 			//씬2
 			isSelecting = 0;
-			clearLv = load();
+
+			load();
 
 			mapCopy();// 맵 복사
 
@@ -1122,6 +1128,7 @@ int main() {
 			direction = 0;
 			isKey = 0;
 			isClear = 0;
+			int grade = 2;
 			screenInit();
 			screenRender(1, 0, 0, 0); // 인게임 화면, 텍스트 박스, 턴 상태창 출력 여부 결정
 			Sleep(100);
@@ -1178,12 +1185,20 @@ int main() {
 				if (isClear)break;
 				if (turnCountText == 0) {
 					currentOption = ShowRestartMenu();
+					if (currentOption == 1) {
+						turnCountText = 50;
+						deckSetting();
+						grade = 1;
+						screenRender(1, 1, 1, 1);
+						continue;
+					}
+					else currentOption--;
 					goto Game;
 				}
 				
 			}
 			if (isClear) {
-				LevelClear();
+				LevelClear(grade);
 				inGameDeckReset();
 				currentOption = 3;
 			}
@@ -1252,24 +1267,30 @@ void drawBlank(int startX, int startY, int height, int width, HANDLE curBuf) {
 		}
 	}
 }
-void save(int k) {
+void save() {
 	FILE* fp;
 	fp = fopen("data.bin", "wb");
-	fwrite(&k, sizeof(int), 1, fp);
+	fwrite(saveData, sizeof(int), 19, fp);
 	fclose(fp);
 	return;
 }// 열린 레벨, 클리어한 레벨, 잠긴 레벨
-int load() {
-	int data = 0;
+void load() {
+	
 	FILE* fp;
 	fp = fopen("data.bin", "rb");
 	if (fp == NULL) {
-		save(0);
+		reset();
 		fp = fopen("data.bin", "rb");
 	}
-	fread(&data, sizeof(int), 1, fp);
+	fread(saveData, sizeof(int), 19, fp);
 	fclose(fp);
-	return data;
+	return;
+}
+void reset() {
+	for (int i = 0; i < 19; i++) {
+		saveData[i] = 0;
+	}
+	save();
 }
 #pragma endregion
 
