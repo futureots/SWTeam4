@@ -30,7 +30,7 @@ int curX, curY;
 MousePosition curMousePos;
 int isClear = 0;
 int hintVisible;//기본값 3, 힌트 5까지
-int saveData[19] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+int saveData[19];
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
@@ -1020,7 +1020,6 @@ int main() {
 
 	CONSOLE_SCREEN_BUFFER_INFO conScreenInfo;
 	GetConsoleScreenBufferInfo(hConsoleOut, &conScreenInfo);
-	save();
 	CONSOLE_CURSOR_INFO curCursorInfo;
 	GetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 	curCursorInfo.bVisible = 0;
@@ -1202,7 +1201,7 @@ int main() {
 				inGameDeckReset();
 				currentOption = 3;
 			}
-			_getch();
+			int t = _getch();
 		Game:
 			direction = 0;
 			hintVisible = 3;
