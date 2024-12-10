@@ -167,23 +167,32 @@ char stageText[19][8][50] = {
 	}
 };
 
-char endingImage[27][100] = {
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-	{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-
+char endingImage[27][101] = {
+	{"@@@@@@@######################################################################################@@@@@@@"},
+	{"@@@@@$########################################################################################$@@@@@"},
+	{"@##$                                                                                            $##@"},
+	{"##            ..                                                                                  ##"},
+	{"##          ~$#$*                                                                                 ##"},
+	{"##         .#####~                                                                                ##"},
+	{"##         =#####:                                                                                ##"}, //10
+	{"##         $#####;                                                                                ##"},
+	{"##         $#####;       -##$,                                                                    ##"},
+	{"##         $#####;     ,$#####=                                                                   ##"}, //10
+	{"##         $#####;    ,#########.                                                                 ##"},
+	{"##         $#####;    *#########:     $$!~                                                        ##"},
+	{"##         $#####;    ##########$    $########$*;::;:-.                                           ##"},
+	{"##         $#####;    ###########   =######################*~....                                 ##"},
+	{"##         $#####;    ###########   $############################$=*!**;~.                        ##"},
+	{"##         $#####;    ##########=   $########################################$*:----,             ##"},
+	{"##         $#####;    ;#########;   $###############################################$$,           ##"}, //20
+	{"##         $#####;    ,########*    $##################################################;          ##"},
+	{"##         $#####;      =#####!     $###################################################          ##"},
+	{"##         $#####;       --~-,      $###################################################=         ##"},//20
+	{"##         $#####;                  $###################################################$         ##"},
+	{"##         $#####;                  $###################################################$         ##"},
+	{"##         $#####;     ,:;;;;;;;;;;;$###################################################$         ##"},
+	{"##         $#####;    ;#################################################################$         ##"},
+	{"##         $#####;    $#################################################################$         ##"},
+	{"##            ..                                                                                  ##"},
+	{"##         $#####;    $#################################################################$         ##"}
 };

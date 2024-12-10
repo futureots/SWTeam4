@@ -666,7 +666,6 @@ void LevelClear() {
 	//클리어 텍스트 출력
 	Printscreen(44, 13, "LEVEL CLEAR!!", gScreen[!gIndex]);
 	if (load() <= currentLevel) save(currentLevel + 1);//현재 저장한 최대 클리어 레벨보다 크면 저장 아니면 저장X
-	
 	Sleep(1000);
 
 	return;
@@ -726,15 +725,18 @@ void EndingScreen() {
 		pos.Y = i;
 		SetConsoleCursorPosition(hConsoleOut, pos);
 		printf("%s",endingImage[i]);
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 30; i++) {
 			Sleep(10);
-			if (_kbhit() != 0) _getch();
+			if (_kbhit() != 0) {
+				_getch();
+			}
 		}
 	}
 	pos.X = 60;
 	pos.Y = 20;
 	SetConsoleCursorPosition(hConsoleOut, pos);
 	printf("아아...");
+	Sleep(1000);
 	pos.Y++;
 	SetConsoleCursorPosition(hConsoleOut, pos);
 	printf("익숙한 천장이다...");
@@ -1017,7 +1019,7 @@ int main() {
 	GetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
 	curCursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(hConsoleOut, &curCursorInfo);
-
+	save(18);
 	system("mode con: cols=100 lines=27 | title 낮선 천장");
 	//씬1
 	displayMainMenu(); // 메인화면 표시
@@ -1185,7 +1187,7 @@ int main() {
 				inGameDeckReset();
 				currentOption = 3;
 			}
-			int t =_getch();
+			_getch();
 		Game:
 			direction = 0;
 			hintVisible = 3;
