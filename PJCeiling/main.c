@@ -30,7 +30,7 @@ int curX, curY;
 MousePosition curMousePos;
 int isClear = 0;
 int hintVisible;//기본값 3, 힌트 5까지
-int saveData[19] = { 2,1,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+int saveData[19] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
