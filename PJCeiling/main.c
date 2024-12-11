@@ -24,6 +24,7 @@ void save();
 void load();
 void reset();
 void HelpPopUp();
+void cheat();
 
 int currentLevel = 0;
 int curX, curY;
@@ -181,6 +182,10 @@ int keyInput(int key) {
 	{
 	case 'q':
 		HelpPopUp();
+		break;
+	case 'c':
+		cheat();
+		break;
 	case 27:
 	case 97:
 		isSelecting = isSelecting > 0 ? isSelecting - 1 : 0;
@@ -418,27 +423,27 @@ void deckSetting() {
 		if (deckInfo[i] != 0) {
 			if (i == 0) {
 				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "밀기Ⅰ");
+				strcpy_s(inGameDeck[idx].cardName, 10, "밀기①");
 				inGameDeck[idx].cardType = 0;
 			}
 			else if (i == 1) {
 				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "점프Ⅱ");
+				strcpy_s(inGameDeck[idx].cardName, 10, "점프②");
 				inGameDeck[idx].cardType = 1;
 			}
 			else if (i == 2) {
 				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "로켓Ⅲ");
+				strcpy_s(inGameDeck[idx].cardName, 10, "로켓③");
 				inGameDeck[idx].cardType = 2;
 			}
 			else if (i == 3) {
 				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "그랩Ⅳ");
+				strcpy_s(inGameDeck[idx].cardName, 10, "그랩④");
 				inGameDeck[idx].cardType = 3;
 			}
 			else if (i == 4) {
 				inGameDeck[idx].cardCount = deckInfo[i];
-				strcpy_s(inGameDeck[idx].cardName, 10, "질주Ⅴ");
+				strcpy_s(inGameDeck[idx].cardName, 10, "질주⑤");
 				inGameDeck[idx].cardType = 4;
 			}
 			idx++;
@@ -1288,6 +1293,12 @@ void load() {
 void reset() {
 	for (int i = 0; i < 19; i++) {
 		saveData[i] = 0;
+	}
+	save();
+}
+void cheat() {
+	for (int i = 0; i < 19; i++) {
+		saveData[i] = 1;
 	}
 	save();
 }

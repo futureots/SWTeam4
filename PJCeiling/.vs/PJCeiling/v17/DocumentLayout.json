@@ -7,16 +7,24 @@
       "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageTextHint.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageTextHint.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageMapInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageMapInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\prepareScene.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:prepareScene.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageMapInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageMapInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageNumberInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageNumberInfo.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageTextHint.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageTextHint.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageGimmick.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{B9B3040D-3CA1-4376-89DE-C5062D22BB29}|PJCeiling.vcxproj|solutionrelative:stageGimmick.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,8 +34,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 5,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "stageGimmick.h",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageGimmick.h",
+              "RelativeDocumentMoniker": "stageGimmick.h",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageGimmick.h",
+              "RelativeToolTip": "stageGimmick.h",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAAwEoAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-12-10T14:13:11.197Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "stageNumberInfo.h",
+              "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageNumberInfo.h",
+              "RelativeDocumentMoniker": "stageNumberInfo.h",
+              "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageNumberInfo.h",
+              "RelativeToolTip": "stageNumberInfo.h",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-12-10T14:06:57.664Z"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -36,31 +68,32 @@
               "RelativeDocumentMoniker": "prepareScene.h",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\prepareScene.h",
               "RelativeToolTip": "prepareScene.h",
-              "ViewState": "AgIAAJwAAAAAAAAAAAAAwIIAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAO0AAAAAAAAAAAAAwPwAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2024-12-08T10:52:45.041Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "stageMapInfo.h",
               "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageMapInfo.h",
               "RelativeDocumentMoniker": "stageMapInfo.h",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageMapInfo.h",
               "RelativeToolTip": "stageMapInfo.h",
-              "ViewState": "AgIAADwAAAAAAAAAAAAAABEAAAA8AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-12-08T07:11:26.624Z"
+              "WhenOpened": "2024-12-08T07:11:26.624Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "stageTextHint.h",
               "DocumentMoniker": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageTextHint.h",
               "RelativeDocumentMoniker": "stageTextHint.h",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\stageTextHint.h",
               "RelativeToolTip": "stageTextHint.h",
-              "ViewState": "AgIAAKoAAAAAAAAAAAAywKkAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAywKkAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2024-12-08T06:54:07.076Z"
             },
@@ -72,7 +105,7 @@
               "RelativeDocumentMoniker": "main.c",
               "ToolTip": "C:\\Users\\user\\Documents\\GitHub\\SWTeam4\\SWTeam4\\PJCeiling\\main.c",
               "RelativeToolTip": "main.c",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAsDAAAAAAAAAAAywC8DAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2024-12-08T06:54:02.934Z",
               "EditorCaption": ""

@@ -226,27 +226,27 @@ void drawCardInfo() {
 	setCurrentCursorPos(cardInfoCoord[0][0], cardInfoCoord[0][1]);
 	printf(" 밀기");
 	setCurrentCursorPos(cardInfoCoord[0][0], cardInfoCoord[0][1] + 2);
-	printf("  Ⅰ ");
+	printf("  ① ");
 
 	setCurrentCursorPos(cardInfoCoord[1][0], cardInfoCoord[1][1]);
 	printf(" 점프");
 	setCurrentCursorPos(cardInfoCoord[1][0], cardInfoCoord[1][1] + 2);
-	printf("  Ⅱ ");
+	printf("  ② ");
 
 	setCurrentCursorPos(cardInfoCoord[2][0], cardInfoCoord[2][1]);
 	printf(" 로켓");
 	setCurrentCursorPos(cardInfoCoord[2][0], cardInfoCoord[2][1] + 2);
-	printf("  Ⅲ ");
+	printf("  ③ ");
 
 	setCurrentCursorPos(cardInfoCoord[3][0], cardInfoCoord[3][1]);
-	printf(" 그랩");
+	printf(" 끌기");
 	setCurrentCursorPos(cardInfoCoord[3][0], cardInfoCoord[3][1] + 2);
-	printf("  Ⅳ ");
+	printf("  ④ ");
 
 	setCurrentCursorPos(cardInfoCoord[4][0], cardInfoCoord[4][1]);
 	printf(" 질주");
 	setCurrentCursorPos(cardInfoCoord[4][0], cardInfoCoord[4][1] + 2);
-	printf("  Ⅴ ");
+	printf("  ⑤ ");
 }
 
 void drawDeckInfo() {
@@ -257,7 +257,7 @@ void drawDeckInfo() {
 	setCurrentCursorPos(deckInfoCoord[2][0], deckInfoCoord[2][1]);
 	printf("로켓");
 	setCurrentCursorPos(deckInfoCoord[3][0], deckInfoCoord[3][1]);
-	printf("그랩");
+	printf("끌기");
 	setCurrentCursorPos(deckInfoCoord[4][0], deckInfoCoord[4][1]);
 	printf("질주");
 

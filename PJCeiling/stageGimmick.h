@@ -74,7 +74,7 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 			if (map[i][0] == -6) map[i][0] -= 10;
 			if (map[i][stageWidth - 1] == -6) map[i][stageWidth - 1] -= 10;
 		}
-		for (int j = 0; j < stageWidth - 1; j++) {
+		for (int j = 1; j < stageWidth - 1; j++) {
 			map[0][j] -= 10;
 			map[19][j] -= 10;
 		}
