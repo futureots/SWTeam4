@@ -62,10 +62,23 @@ void changeMapFromPlugOn(int x, int y, int map[20][30], int curLevel) {
 			if (map[i][stageWidth - 1] == -6) map[i][stageWidth-1] -= 10;
 		}
 	}
-	//¼¶ Å»Ãâ
+	//°¡Àåºü¸¥Æ®·¢
 	else if (curLevel == 9) {
 		for (int i = 3; i <= 26; i++) {
 			map[17][i] = 0;
+		}
+	}
+	//¼¶Å»Ãâ
+	else if (curLevel == 10) {
+		if (x == 8 && y == 4) {
+			for (int i = 13; i <= 17; i++) {
+				if (map[4][i] == 3)	map[4][i] = 0;
+			}
+			// x = 15 y = 5 ~ 10
+			for (int i = 5; i <= 10; i++) {
+				if (map[i][15] == 3)map[i][15] = 0;
+			}
+
 		}
 	}
 	//¼±Ç³±â °³Ã´

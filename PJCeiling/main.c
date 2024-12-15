@@ -26,12 +26,14 @@ void reset();
 void HelpPopUp();
 void cheat();
 
+
 int currentLevel = 0;
 int curX, curY;
 MousePosition curMousePos;
 int isClear = 0;
 int hintVisible;//기본값 3, 힌트 5까지
 int saveData[19];
+
 //씬1 관련 함수
 #pragma region MainSceneFunc
 
@@ -853,7 +855,7 @@ void PullBlock(int x, int y, int d) {
 	if (blockNum == 0 || blockNum == 3 || blockNum == 5) {
 		PullBlock(x + moveX, y + moveY, d);
 	}
-	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum <= 23) 
+	else if (blockNum <= -1 && blockNum >= -6 || blockNum == 10 || (blockNum >= 20 && blockNum <= 23)
 			|| blockNum == 5 || blockNum == 6) return;
 	else {
 		MoveBlock(x + 2 * moveX, y + 2 * moveY, d % 2 + (1 - d / 2) * 2);// 블럭을 반대방향에서 미는 함수
@@ -893,6 +895,7 @@ void MovePlayer(int x, int y) {
 		curX += x;
 		break;
 	case 6:
+		currentMap[curY + y][curX + x] = 0;
 		slimeSplit(curX, curY, currentMap);
 		break;
 	case 40:
@@ -1022,7 +1025,6 @@ int prepareProcessInputs(HANDLE hConsoleInput) {
 int main() {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE hConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
-
 	CONSOLE_SCREEN_BUFFER_INFO conScreenInfo;
 	GetConsoleScreenBufferInfo(hConsoleOut, &conScreenInfo);
 	CONSOLE_CURSOR_INFO curCursorInfo;
@@ -1302,6 +1304,7 @@ void cheat() {
 	}
 	save();
 }
+
 #pragma endregion
 
 
